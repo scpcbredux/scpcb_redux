@@ -1,0 +1,9 @@
+[package]
+name = "bevy_xfile"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = { version = "0.10.1", default-features = false }
+anyhow = "1.0.68"
+russimp = { git = "https://github.com/jkvargas/russimp" }

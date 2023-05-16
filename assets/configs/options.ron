@@ -1,0 +1,18 @@
+(
+    movement: {
+        key_up: KeyCode::W,
+        key_down: KeyCode::S,
+        key_left: KeyCode::A,
+        key_right: KeyCode::D,
+
+        key_blink: KeyCode::Space,
+        key_sprint: KeyCode::LShift,
+        key_inv: KeyCode::Tab,
+        key_crouch: KeyCode::LControl,
+        key_save: KeyCode::Colon,
+        key_console: KeyCode::Grave,
+
+        mouse_smooth: 1.0,
+        sensitivity: 0.0,
+    },
+)

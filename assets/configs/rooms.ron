@@ -1,0 +1,40 @@
+(
+    room_ambiences: [
+        "audio/music/ambience/room/rumble.ogg",
+        "audio/music/ambience/room/lowdrone.ogg",
+        "audio/music/ambience/room/pulsing.ogg",
+        "audio/music/ambience/room/ventilation.ogg",
+        "audio/music/ambience/room/drip.ogg",
+        "audio/music/ambience/room/895.ogg",
+        "audio/music/ambience/room/fuel_pump.ogg",
+        "audio/music/ambience/room/fan.ogg",
+        "audio/music/ambience/room/servers1.ogg",
+        "audio/sfx/alarm/alarm.ogg",
+    ],
+    rooms: {
+        // Light Containment Zone
+        "lockroom": (
+            description: "A timed airlock room, with two doors",
+            mesh: "map/lockroom.rmesh",
+            room_shape: "2c",
+            commonness: 30,
+            zones: [1, 3],
+        ),
+        "173": (
+            description: "Class-D Cells & SCP-173's chamber in the intro",
+            mesh: "map/173bright.rmesh",
+            room_shape: "1",
+            commonness: 0,
+            disable_decals: true,
+        ),
+        "start": (
+            description: "SCP-173's chamber, after the breach",
+            mesh: "map/173.rmesh",
+            room_shape: "1",
+            commonness: 0,
+            disable_decals: true,
+        ),
+        // Heavy Containment Zone
+        // Entrance Zone
+    }
+)
