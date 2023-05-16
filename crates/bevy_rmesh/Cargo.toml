@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.10.1", default-features = false, features = ["bevy_pbr"] }
 anyhow = "1.0.68"
-# rmesh = "0.2.0"
-rmesh = { path = "/home/charlie/Documents/git/rmesh/" }
+rmesh = "0.3.0"
 percent-encoding = "2.2.0"
 russimp = "2.0.2"
