@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: System dependencies
-      run: sudo apt-get install libwayland-dev libasound2-dev
+      run: sudo apt-get install libwayland-dev libasound2-dev libxkbcommon-dev
     - name: Build
       run: cargo build --verbose --release
     - name: Run tests
