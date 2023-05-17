@@ -28,10 +28,3 @@ pub struct RoomMesh {
     pub mesh: Handle<Mesh>,
     pub material: Handle<StandardMaterial>,
 }
-
-// #[derive(Debug, TypeUuid)]
-// #[uuid = "b33fbaee-ea1b-4de9-86b4-e4ee5bb20284"]
-// pub struct XMesh {
-//     pub mesh: Handle<Mesh>,
-//     pub material: Handle<StandardMaterial>,
-// }

@@ -15,6 +15,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Install Wayland
+      run: sudo apt-get install -y libwayland0
     - name: Build
       run: cargo build --verbose --release
     - name: Run tests

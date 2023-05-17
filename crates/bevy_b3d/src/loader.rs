@@ -57,8 +57,7 @@ async fn load_b3d<'a, 'b>(
     let b3d = b3d::B3D::read(bytes)?;
 
     let mut materials = vec![];
-    let mut texture_index = 0;
-    for texture in b3d.textures {
+    for (texture_index, texture) in b3d.textures.into_iter().enumerate() {
         let texture = load_texture(&texture, load_context, supported_compressed_formats).await?;
         let texture_handle = load_context.set_labeled_asset(&format!("Texture{}", texture_index), LoadedAsset::new(texture));
         
@@ -70,15 +69,14 @@ async fn load_b3d<'a, 'b>(
             }),
         );
         materials.push(handle);
-        texture_index += 1;
     }
 
     let mut meshes = vec![];
     let (mesh, mesh_label) = load_mesh(&b3d.node.mesh)?;
     let mesh_handle = load_context.set_labeled_asset(&mesh_label, LoadedAsset::new(mesh));
-    let mat_asset_path = AssetPath::new_ref(load_context.path(), Some(&"Material0"));
+    let mat_asset_path = AssetPath::new_ref(load_context.path(), Some("Material0"));
     let bmesh_handle = load_context.set_labeled_asset(
-        &"B3DMesh0",
+        "B3DMesh0",
         LoadedAsset::new(crate::B3DMesh {
             mesh: mesh_handle,
             material: Some(load_context.get_handle(mat_asset_path)),
@@ -101,8 +99,7 @@ async fn load_b3d<'a, 'b>(
                     load_context,
                 );
                 if result.is_err() {
-                    err = Some(result);
-                    return;
+                    err = Some(result)
                 }
             });
         if let Some(Err(err)) = err {
@@ -110,7 +107,7 @@ async fn load_b3d<'a, 'b>(
         }
 
         load_context.set_labeled_asset(
-            &"Scene",
+            "Scene",
             LoadedAsset::new(Scene::new(world)),
         )
     };
@@ -126,10 +123,10 @@ async fn load_b3d<'a, 'b>(
 }
 
 /// Loads a b3d node.
-fn load_node<'a, 'b>(
+fn load_node(
     b3d_node: &b3d::Node,
     world_builder: &mut WorldChildBuilder,
-    load_context: &'a mut LoadContext<'b>,
+    load_context: &mut LoadContext<'_>,
 ) -> Result<(), B3DError> {
     let transform = Transform {
         translation: b3d_node.position.into(),
@@ -144,10 +141,10 @@ fn load_node<'a, 'b>(
     node.with_children(|parent| {
         let mesh = &b3d_node.mesh;
 
-        let mesh_label = mesh_label(&mesh);
+        let mesh_label = mesh_label(mesh);
 
         let mesh_asset_path = AssetPath::new_ref(load_context.path(), Some(&mesh_label));
-        let material_asset_path = AssetPath::new_ref(load_context.path(), Some(&"Material0"));
+        let material_asset_path = AssetPath::new_ref(load_context.path(), Some("Material0"));
 
         let mut mesh_entity = parent.spawn(PbrBundle {
             mesh: load_context.get_handle(mesh_asset_path),
@@ -160,7 +157,7 @@ fn load_node<'a, 'b>(
         // append other nodes
         for child in &b3d_node.children {
             if let Err(err) = load_node(
-                &child,
+                child,
                 parent,
                 load_context
             ) {
@@ -177,7 +174,7 @@ fn load_node<'a, 'b>(
     }
 }
 
-fn load_mesh<'a, 'b>(b3d_mesh: &b3d::Mesh) -> Result<(Mesh, String), B3DError> {
+fn load_mesh(b3d_mesh: &b3d::Mesh) -> Result<(Mesh, String), B3DError> {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     
     if let Some(vertex_attribute) = b3d_mesh
@@ -231,7 +228,7 @@ fn load_mesh<'a, 'b>(b3d_mesh: &b3d::Mesh) -> Result<(Mesh, String), B3DError> {
         );
     }
 
-    Ok((mesh, mesh_label(&b3d_mesh)))
+    Ok((mesh, mesh_label(b3d_mesh)))
 }
 
 /// Loads a b3d texture as a bevy [`Image`] and returns it together with its label.
@@ -240,23 +237,19 @@ async fn load_texture<'a>(
     load_context: &LoadContext<'a>,
     supported_compressed_formats: CompressedImageFormats,
 ) -> Result<Image, B3DError> {
-    let texture = {
-        let parent = load_context.path().parent().unwrap();
-        let image_path = parent.join(&b3d_texture.file);
-        let bytes = load_context.read_asset_bytes(image_path.clone()).await?;
-    
-        let extension = Path::new(&b3d_texture.file).extension().unwrap().to_str().unwrap();
-        let image_type = ImageType::Extension(extension);
+    let parent = load_context.path().parent().unwrap();
+    let image_path = parent.join(&b3d_texture.file);
+    let bytes = load_context.read_asset_bytes(image_path.clone()).await?;
 
-        Image::from_buffer(
-            &bytes,
-            image_type,
-            supported_compressed_formats,
-            true,
-        )?
-    };
+    let extension = Path::new(&b3d_texture.file).extension().unwrap().to_str().unwrap();
+    let image_type = ImageType::Extension(extension);
 
-    Ok(texture)
+    Ok(Image::from_buffer(
+        &bytes,
+        image_type,
+        supported_compressed_formats,
+        true,
+    )?)
 }
 
 fn mesh_label(mesh: &b3d::Mesh) -> String {
