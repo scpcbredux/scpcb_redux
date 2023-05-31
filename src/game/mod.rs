@@ -1,8 +1,3 @@
-pub mod scp_106;
-pub mod player;
-mod systems;
-mod ui;
-
 use scp_106::Scp106Plugin;
 use player::PlayerPlugin;
 use systems::*;
@@ -12,6 +7,13 @@ use bevy::prelude::*;
 use crate::AppState;
 
 use self::ui::GameUiPlugin;
+
+pub mod scp_106;
+pub mod player;
+
+mod systems;
+mod ui;
+mod components;
 
 pub struct GamePlugin;
 
@@ -29,7 +31,7 @@ impl Plugin for GamePlugin {
             .add_system(toggle_simulation.in_set(OnUpdate(AppState::Game))
             )
             // OnExit System
-            .add_system(resume_simulation.in_schedule(OnExit(AppState::Game)));
+            .add_systems((resume_simulation, despawn_map).in_schedule(OnExit(AppState::Game)));
     }
 }
 

@@ -5,6 +5,7 @@ use anyhow::Result;
 use bevy::asset::AssetPath;
 use bevy::asset::{AssetLoader, LoadContext, LoadedAsset};
 use bevy::prelude::*;
+use bevy::render::renderer::RenderDevice;
 use bevy::render::texture::{CompressedImageFormats, ImageType};
 use bevy::render::{
     mesh::{Indices, Mesh},
@@ -15,8 +16,9 @@ use rmesh::read_rmesh;
 
 pub const ROOM_SCALE: f32 = 8. / 2048.;
 
-#[derive(Default)]
-pub struct RMeshLoader;
+pub struct RMeshLoader {
+    supported_compressed_formats: CompressedImageFormats,
+}
 
 impl AssetLoader for RMeshLoader {
     fn load<'a>(
@@ -24,7 +26,9 @@ impl AssetLoader for RMeshLoader {
         bytes: &'a [u8],
         load_context: &'a mut LoadContext,
     ) -> BoxedFuture<'a, Result<()>> {
-        Box::pin(async move { load_rmesh(bytes, load_context).await })
+        Box::pin(
+            async move { load_rmesh(bytes, load_context, self.supported_compressed_formats).await },
+        )
     }
 
     fn extensions(&self) -> &[&str] {
@@ -32,8 +36,24 @@ impl AssetLoader for RMeshLoader {
     }
 }
 
+impl FromWorld for RMeshLoader {
+    fn from_world(world: &mut World) -> Self {
+        let supported_compressed_formats = match world.get_resource::<RenderDevice>() {
+            Some(render_device) => CompressedImageFormats::from_features(render_device.features()),
+            None => CompressedImageFormats::all(),
+        };
+        Self {
+            supported_compressed_formats,
+        }
+    }
+}
+
 /// Loads an entire rmesh file.
-async fn load_rmesh<'a, 'b>(bytes: &'a [u8], load_context: &'a mut LoadContext<'b>) -> Result<()> {
+async fn load_rmesh<'a, 'b>(
+    bytes: &'a [u8],
+    load_context: &'a mut LoadContext<'b>,
+    supported_compressed_formats: CompressedImageFormats,
+) -> Result<()> {
     let header = read_rmesh(bytes)?;
 
     let mut meshes = vec![];
@@ -70,7 +90,12 @@ async fn load_rmesh<'a, 'b>(bytes: &'a [u8], load_context: &'a mut LoadContext<'
             load_context.set_labeled_asset(&format!("Mesh{0}", i), LoadedAsset::new(result_mesh));
 
         let base_color_texture = if let Some(path) = &mesh.textures[1].path {
-            let texture = load_texture(&String::from(path), load_context).await?;
+            let texture = load_texture(
+                &String::from(path),
+                load_context,
+                supported_compressed_formats,
+            )
+            .await?;
             Some(
                 load_context
                     .set_labeled_asset(&format!("Texture{0}", i), LoadedAsset::new(texture)),
@@ -98,10 +123,8 @@ async fn load_rmesh<'a, 'b>(bytes: &'a [u8], load_context: &'a mut LoadContext<'
     //         let name = &String::from(data.name.clone());
     //         let (mesh, tex_path) = load_xfile(name, load_context).await?;
 
-    //         let mesh_handle = load_context.set_labeled_asset(
-    //             &format!("EntityMesh{0}", name),
-    //             LoadedAsset::new(mesh),
-    //         );
+    //         let mesh_handle = load_context
+    //             .set_labeled_asset(&format!("EntityMesh{0}", name), LoadedAsset::new(mesh));
 
     //         let base_color_texture = {
     //             let texture = load_xtexture(&tex_path, load_context).await?;
@@ -244,18 +267,22 @@ async fn load_rmesh<'a, 'b>(bytes: &'a [u8], load_context: &'a mut LoadContext<'
     Ok(())
 }
 
-async fn load_texture<'a>(uri: &str, load_context: &LoadContext<'a>) -> Result<Image> {
+async fn load_texture<'a>(
+    path: &str,
+    load_context: &LoadContext<'a>,
+    supported_compressed_formats: CompressedImageFormats,
+) -> Result<Image> {
     let parent = load_context.path().parent().unwrap();
-    let image_path = parent.join(uri);
+    let image_path = parent.join(path);
     let bytes = load_context.read_asset_bytes(image_path.clone()).await?;
 
-    let extension = Path::new(uri).extension().unwrap().to_str().unwrap();
+    let extension = Path::new(path).extension().unwrap().to_str().unwrap();
     let image_type = ImageType::Extension(extension);
 
     Ok(Image::from_buffer(
         &bytes,
         image_type,
-        CompressedImageFormats::NONE,
+        supported_compressed_formats,
         true,
     )?)
 }

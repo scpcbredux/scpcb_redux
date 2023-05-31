@@ -91,9 +91,105 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
                     );
                 });
                 // === Load Game Button ===
+                parent.spawn((
+                    ButtonBundle {
+                        style: BUTTON_STYLE,
+                        image: asset_server.load("ui/menu/menu_white.jpg").into(),
+                        ..default()
+                    },
+                    LoadGameButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(ImageBundle {
+                        style: BUTTON_BACK_STYLE,
+                        image: asset_server.load("ui/menu/menu_black.jpg").into(),
+                        ..default()
+                    });
+                    parent.spawn(TextBundle::from_section(
+                        "LOAD GAME",
+                        TextStyle {
+                            font: asset_server.load("ui/fonts/courier_new.ttf"),
+                            font_size: BUTTON_FONT_SIZE,
+                            color: BUTTON_FONT_COLOR,
+                        })
+                        .with_text_alignment(TextAlignment::Center)
+                    );
+                });
                 // === Achievements Button ===
+                parent.spawn((
+                    ButtonBundle {
+                        style: BUTTON_STYLE,
+                        image: asset_server.load("ui/menu/menu_white.jpg").into(),
+                        ..default()
+                    },
+                    AchievementsButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(ImageBundle {
+                        style: BUTTON_BACK_STYLE,
+                        image: asset_server.load("ui/menu/menu_black.jpg").into(),
+                        ..default()
+                    });
+                    parent.spawn(TextBundle::from_section(
+                        "ACHIEVEMENTS",
+                        TextStyle {
+                            font: asset_server.load("ui/fonts/courier_new.ttf"),
+                            font_size: BUTTON_FONT_SIZE,
+                            color: BUTTON_FONT_COLOR,
+                        })
+                        .with_text_alignment(TextAlignment::Center)
+                    );
+                });
                 // === Options Button ===
+                parent.spawn((
+                    ButtonBundle {
+                        style: BUTTON_STYLE,
+                        image: asset_server.load("ui/menu/menu_white.jpg").into(),
+                        ..default()
+                    },
+                    OptionsButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(ImageBundle {
+                        style: BUTTON_BACK_STYLE,
+                        image: asset_server.load("ui/menu/menu_black.jpg").into(),
+                        ..default()
+                    });
+                    parent.spawn(TextBundle::from_section(
+                        "OPTIONS",
+                        TextStyle {
+                            font: asset_server.load("ui/fonts/courier_new.ttf"),
+                            font_size: BUTTON_FONT_SIZE,
+                            color: BUTTON_FONT_COLOR,
+                        })
+                        .with_text_alignment(TextAlignment::Center)
+                    );
+                });
                 // === Quit Button ===
+                parent.spawn((
+                    ButtonBundle {
+                        style: BUTTON_STYLE,
+                        image: asset_server.load("ui/menu/menu_white.jpg").into(),
+                        ..default()
+                    },
+                    QuitButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(ImageBundle {
+                        style: BUTTON_BACK_STYLE,
+                        image: asset_server.load("ui/menu/menu_black.jpg").into(),
+                        ..default()
+                    });
+                    parent.spawn(TextBundle::from_section(
+                        "QUIT",
+                        TextStyle {
+                            font: asset_server.load("ui/fonts/courier_new.ttf"),
+                            font_size: BUTTON_FONT_SIZE,
+                            color: BUTTON_FONT_COLOR,
+                        })
+                        .with_text_alignment(TextAlignment::Center)
+                    );
+                });
             });
         });
     })

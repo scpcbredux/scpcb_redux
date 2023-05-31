@@ -42,12 +42,9 @@ pub fn player_look(
 ) {
     for (p_transform, player) in &mut q_player {
         if let Ok(mut c_transform) = q_camera.get_single_mut() {
-            // player.camera_shake = (player.camera_shake - (dt / 10.0)).max(0.0);
+            // let roll = ((player.shake.sin().to_radians() / 2.0) * 2.5).clamp(-8.0, 8.0) * 1.25;
 
-            let up = (player.shake.sin() / (20.0 + player.crouch_state * 20.0)) * 0.6;
-            // let roll = ((player.shake / 2.0) * 2.5 * 0.25).clamp(-8.0, 8.0);
-
-            c_transform.translation = p_transform.translation + Vec3::Y * player.camera_height + up;
+            c_transform.translation = p_transform.translation + Vec3::Y * player.height;
             c_transform.rotation = Quat::from_euler(
                 EulerRot::YXZ,
                 input.yaw,
@@ -73,11 +70,11 @@ pub fn player_move(
         let speed = if input.sprinting { player.run_speed } else { player.walk_speed };
         velocity.linvel = test * input.movement * speed;
 
-        player.shake = if velocity.linvel.length_squared() > 0.0 {
-            ((player.shake + dt * 1.5) * 7.0) % 720.0
-        } else {
-            0.0
-        };
+        // player.shake = if velocity.linvel.length_squared() > 0.0 {
+        //     ((player.shake + dt * 1.5) * 7.0) % 720.0
+        // } else {
+        //     0.0
+        // };
     }
 }
 

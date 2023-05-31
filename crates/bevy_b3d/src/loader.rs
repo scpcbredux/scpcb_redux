@@ -58,21 +58,24 @@ async fn load_b3d<'a, 'b>(
 
     let mut materials = vec![];
     for (texture_index, texture) in b3d.textures.into_iter().enumerate() {
-        let texture = load_texture(&texture, load_context, supported_compressed_formats).await?;
-        let texture_handle = load_context.set_labeled_asset(&format!("Texture{}", texture_index), LoadedAsset::new(texture));
+        if let Ok(texture) = load_texture(&texture, load_context, supported_compressed_formats).await {
+            let texture_handle = load_context.set_labeled_asset(&format!("Texture{}", texture_index), LoadedAsset::new(texture));
         
-        let handle = load_context.set_labeled_asset(
-            &format!("Material{}", texture_index),
-            LoadedAsset::new(StandardMaterial {
-                base_color_texture: Some(texture_handle),
-                ..Default::default()
-            }),
-        );
-        materials.push(handle);
+            let handle = load_context.set_labeled_asset(
+                &format!("Material{}", texture_index),
+                LoadedAsset::new(StandardMaterial {
+                    base_color_texture: Some(texture_handle),
+                    ..Default::default()
+                }),
+            );
+            materials.push(handle);
+        }
     }
 
+    info!("Mesh key_flags: {:#?}", b3d.node.key_flags);
+
     let mut meshes = vec![];
-    let (mesh, mesh_label) = load_mesh(&b3d.node.mesh)?;
+    let (mesh, mesh_label) = load_mesh(&b3d.node.mesh, 0)?;
     let mesh_handle = load_context.set_labeled_asset(&mesh_label, LoadedAsset::new(mesh));
     let mat_asset_path = AssetPath::new_ref(load_context.path(), Some("Material0"));
     let bmesh_handle = load_context.set_labeled_asset(
@@ -141,7 +144,7 @@ fn load_node(
     node.with_children(|parent| {
         let mesh = &b3d_node.mesh;
 
-        let mesh_label = mesh_label(mesh);
+        let mesh_label = mesh_label(0);
 
         let mesh_asset_path = AssetPath::new_ref(load_context.path(), Some(&mesh_label));
         let material_asset_path = AssetPath::new_ref(load_context.path(), Some("Material0"));
@@ -174,9 +177,9 @@ fn load_node(
     }
 }
 
-fn load_mesh(b3d_mesh: &b3d::Mesh) -> Result<(Mesh, String), B3DError> {
+fn load_mesh(b3d_mesh: &b3d::Mesh, index: u32) -> Result<(Mesh, String), B3DError> {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    
+
     if let Some(vertex_attribute) = b3d_mesh
         .vertices
         .vertices
@@ -228,7 +231,7 @@ fn load_mesh(b3d_mesh: &b3d::Mesh) -> Result<(Mesh, String), B3DError> {
         );
     }
 
-    Ok((mesh, mesh_label(b3d_mesh)))
+    Ok((mesh, mesh_label(index)))
 }
 
 /// Loads a b3d texture as a bevy [`Image`] and returns it together with its label.
@@ -252,8 +255,8 @@ async fn load_texture<'a>(
     )?)
 }
 
-fn mesh_label(mesh: &b3d::Mesh) -> String {
-    format!("Mesh{}", mesh.brush_id)
+fn mesh_label(index: u32) -> String {
+    format!("Mesh{}", index)
 }
 
 fn node_name(node: &b3d::Node) -> Name {
