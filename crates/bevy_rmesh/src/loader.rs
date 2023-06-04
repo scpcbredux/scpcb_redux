@@ -74,7 +74,17 @@ async fn load_rmesh<'a, 'b>(
                 ]
             })
             .collect();
-        let tex_coords: Vec<_> = mesh.vertices.iter().map(|v| v.tex_coords[0]).collect();
+
+        let tex_coords: Vec<_> = mesh
+            .vertices
+            .iter()
+            .flat_map(|v| {
+                [
+                    [v.tex_coords[0][0], 1.0 - v.tex_coords[0][1]], // First UV channel
+                    [v.tex_coords[1][0], 1.0 - v.tex_coords[1][1]], // Second UV channel
+                ]
+            })
+            .collect();
         let indices = mesh
             .triangles
             .iter()
