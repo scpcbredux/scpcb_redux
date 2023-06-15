@@ -7,15 +7,13 @@ pub struct Player {
     pub walk_footsteps: Vec<String>,
     pub run_footsteps: Vec<String>,
     pub height: f32,
-    pub bob_speed: f32,
-    pub bob_amount: Vec2,
 }
 
 impl Default for Player {
     fn default() -> Self {
         Self {
-            walk_speed: 3.5,
-            run_speed: 5.0,
+            walk_speed: 4.5,
+            run_speed: 8.0,
             walk_footsteps: vec![
                 "sounds/sfx/footsteps/step01.ogg".to_string(),
                 "sounds/sfx/footsteps/step02.ogg".to_string(),
@@ -37,11 +35,25 @@ impl Default for Player {
                 "sounds/sfx/footsteps/run08.ogg".to_string(),
             ],
             height: 1.1,
-            bob_speed: 3.5,
-            bob_amount: Vec2::splat(0.03),
         }
     }
 }
 
 #[derive(Component)]
-pub struct PlayerCamera;
+pub struct PlayerCamera {
+    pub speed: f32,
+    pub amount: Vec2,
+    pub tilt: f32,
+    pub bobbing_state: f32,
+}
+
+impl Default for PlayerCamera {
+    fn default() -> Self {
+        Self {
+            speed: 0.035,
+            amount: Vec2::splat(3.0),
+            tilt: 2.0f32.to_radians(),
+            bobbing_state: 0.0,
+        }
+    }
+}

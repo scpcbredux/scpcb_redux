@@ -1,8 +1,8 @@
-use std::f32::consts::*;
-use bevy::{prelude::*, input::mouse::MouseMotion};
+use bevy::{input::mouse::MouseMotion, math::Vec3Swizzles, prelude::*};
 use bevy_rapier3d::prelude::*;
+use std::f32::consts::*;
 
-use crate::game::player::{resources::*, components::*, ANGLE_EPSILON};
+use crate::game::player::{components::*, resources::*, ANGLE_EPSILON};
 
 pub fn player_input(
     settings: Res<MovementSettings>,
@@ -19,7 +19,8 @@ pub fn player_input(
         }
         delta *= settings.sensitivity;
 
-        input.pitch = (input.pitch - delta.y).clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
+        input.pitch =
+            (input.pitch - delta.y).clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
         input.yaw -= delta.x;
         if input.yaw.abs() > PI {
             input.yaw = input.yaw.rem_euclid(TAU);
@@ -30,7 +31,8 @@ pub fn player_input(
         get_input_axis(settings.key_right, settings.key_left, &keys),
         0.0,
         get_input_axis(settings.key_up, settings.key_down, &keys),
-    ).normalize_or_zero();
+    )
+    .normalize_or_zero();
 
     input.sprinting = keys.pressed(settings.key_sprint);
 }
@@ -42,39 +44,50 @@ pub fn player_look(
 ) {
     for (p_transform, player) in &mut q_player {
         if let Ok(mut c_transform) = q_camera.get_single_mut() {
-            // let roll = ((player.shake.sin().to_radians() / 2.0) * 2.5).clamp(-8.0, 8.0) * 1.25;
-
             c_transform.translation = p_transform.translation + Vec3::Y * player.height;
-            c_transform.rotation = Quat::from_euler(
-                EulerRot::YXZ,
-                input.yaw,
-                input.pitch,
-                // roll,
-                0.0,
-            );
+            c_transform.rotation = Quat::from_euler(EulerRot::YXZ, input.yaw, input.pitch, 0.0);
         }
     }
 }
 
-pub fn player_move(
-    time: Res<Time>,
-    mut query: Query<(&mut Player, &mut Velocity)>,
-    input: Res<PlayerInput>,
-) {
-    let dt = time.delta_seconds();
-
-    for (mut player, mut velocity) in &mut query {
+pub fn player_move(mut query: Query<(&Player, &mut Velocity)>, input: Res<PlayerInput>) {
+    for (player, mut velocity) in &mut query {
         let mut test = Mat3::from_axis_angle(Vec3::Y, input.yaw);
         test.z_axis *= -1.0;
 
-        let speed = if input.sprinting { player.run_speed } else { player.walk_speed };
+        let speed = if input.sprinting {
+            player.run_speed
+        } else {
+            player.walk_speed
+        };
         velocity.linvel = test * input.movement * speed;
+    }
+}
 
-        // player.shake = if velocity.linvel.length_squared() > 0.0 {
-        //     ((player.shake + dt * 1.5) * 7.0) % 720.0
-        // } else {
-        //     0.0
-        // };
+pub fn player_bob(
+    mut camera_query: Query<(&mut PlayerCamera, &mut Transform), Without<Player>>,
+    player_query: Query<&Velocity, (With<Player>, Without<PlayerCamera>)>,
+) {
+    if let Ok(player_velocity) = player_query.get_single() {
+        let move_distance_squared = player_velocity.linvel.xz().length_squared();
+
+        for (mut camera, mut transform) in &mut camera_query {
+            let adjusted_move_speed = 1.0 + move_distance_squared.ln() / 3.0;
+
+            // let off = Vec3::new(
+            //     -(camera.bobbing_state * camera.speed).sin() * camera.amount.y,
+            //     (camera.bobbing_state * camera.speed / 2.0).cos() * camera.amount.x,
+            //     0.0,
+            // );
+
+            let rot = -(camera.bobbing_state * camera.speed / 2.0).cos() * camera.tilt;
+
+            camera.bobbing_state += (adjusted_move_speed).max(0.0);
+            camera.bobbing_state %= (PI / 2.0) / (camera.speed / 2.0);
+
+            transform.rotate_z(rot);
+            // transform.translation += off;
+        }
     }
 }
 

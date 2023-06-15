@@ -1,8 +1,13 @@
-use bevy::{prelude::*, window::CursorGrabMode, ecs::{world::EntityRef, system::EntityCommands}};
+use bevy::{
+    ecs::{system::EntityCommands, world::EntityRef},
+    prelude::*,
+    window::CursorGrabMode,
+};
 use bevy_rapier3d::prelude::*;
+use bevy_rmesh::ROOM_SCALE;
 use bevy_scene_hook::{HookedSceneBundle, SceneHook};
 
-use super::{SimulationState, player::*, components::Map};
+use super::{components::Map, player::*, SimulationState};
 
 pub fn pause_simulation(mut simulation_state_next_state: ResMut<NextState<SimulationState>>) {
     simulation_state_next_state.set(SimulationState::Paused);
@@ -35,7 +40,12 @@ pub fn toggle_simulation(
     }
 }
 
-pub fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>, mut materials: ResMut<Assets<StandardMaterial>>, mut windows: Query<&mut Window>) {
+pub fn spawn_map(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut windows: Query<&mut Window>,
+) {
     let mut window = windows.single_mut();
     window.cursor.visible = true;
     window.cursor.grab_mode = CursorGrabMode::None;
@@ -76,6 +86,21 @@ pub fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>, mut mat
         Ccd { enabled: true },
         TransformBundle::from(Transform::from_translation((1.8, 0., 1.5).into())),
         Player::default(),
+        Map,
+    ));
+
+    // Player Camera
+    commands.spawn((
+        Camera3dBundle {
+            projection: Projection::Perspective(PerspectiveProjection {
+                fov: 70.0_f32.to_radians(),
+                near: 3.0 * ROOM_SCALE,
+                far: 200.0 * ROOM_SCALE,
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        PlayerCamera::default(),
         Map,
     ));
 

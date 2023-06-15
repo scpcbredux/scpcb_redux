@@ -4,8 +4,7 @@
 
 // use super::Scp106;
 
-pub fn scp106_update(
-    // nquery: Query<&Transform, (With<Scp106>, Without<Player>)>,
+pub fn scp106_update(// nquery: Query<&Transform, (With<Scp106>, Without<Player>)>,
     // pquery: Query<&Transform, (With<Player>, Without<Scp106>)>,
 ) {
     // for ntransform in &nquery {

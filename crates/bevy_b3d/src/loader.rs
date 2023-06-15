@@ -1,5 +1,15 @@
 use anyhow::Result;
-use bevy::{prelude::*, asset::{AssetLoader, LoadContext, LoadedAsset, AssetPath, AssetIoError}, utils::{BoxedFuture}, render::{render_resource::PrimitiveTopology, mesh::Indices, texture::{CompressedImageFormats, ImageType, TextureError}, renderer::RenderDevice}};
+use bevy::{
+    asset::{AssetIoError, AssetLoader, AssetPath, LoadContext, LoadedAsset},
+    prelude::*,
+    render::{
+        mesh::Indices,
+        render_resource::PrimitiveTopology,
+        renderer::RenderDevice,
+        texture::{CompressedImageFormats, ImageType, TextureError},
+    },
+    utils::BoxedFuture,
+};
 use std::path::Path;
 use thiserror::Error;
 
@@ -58,9 +68,14 @@ async fn load_b3d<'a, 'b>(
 
     let mut materials = vec![];
     for (texture_index, texture) in b3d.textures.into_iter().enumerate() {
-        if let Ok(texture) = load_texture(&texture, load_context, supported_compressed_formats).await {
-            let texture_handle = load_context.set_labeled_asset(&format!("Texture{}", texture_index), LoadedAsset::new(texture));
-        
+        if let Ok(texture) =
+            load_texture(&texture, load_context, supported_compressed_formats).await
+        {
+            let texture_handle = load_context.set_labeled_asset(
+                &format!("Texture{}", texture_index),
+                LoadedAsset::new(texture),
+            );
+
             let handle = load_context.set_labeled_asset(
                 &format!("Material{}", texture_index),
                 LoadedAsset::new(StandardMaterial {
@@ -83,7 +98,7 @@ async fn load_b3d<'a, 'b>(
         LoadedAsset::new(crate::B3DMesh {
             mesh: mesh_handle,
             material: Some(load_context.get_handle(mat_asset_path)),
-        })
+        }),
     );
     meshes.push(bmesh_handle);
 
@@ -96,11 +111,7 @@ async fn load_b3d<'a, 'b>(
         world
             .spawn(SpatialBundle::INHERITED_IDENTITY)
             .with_children(|parent| {
-                let result = load_node(
-                    &b3d.node,
-                    parent,
-                    load_context,
-                );
+                let result = load_node(&b3d.node, parent, load_context);
                 if result.is_err() {
                     err = Some(result)
                 }
@@ -109,10 +120,7 @@ async fn load_b3d<'a, 'b>(
             return Err(err);
         }
 
-        load_context.set_labeled_asset(
-            "Scene",
-            LoadedAsset::new(Scene::new(world)),
-        )
+        load_context.set_labeled_asset("Scene", LoadedAsset::new(Scene::new(world)))
     };
 
     load_context.set_default_asset(LoadedAsset::new(B3D {
@@ -133,7 +141,12 @@ fn load_node(
 ) -> Result<(), B3DError> {
     let transform = Transform {
         translation: b3d_node.position.into(),
-        rotation: Quat::from_euler(EulerRot::XYZ, b3d_node.rotation[0], b3d_node.rotation[1], b3d_node.rotation[2]),
+        rotation: Quat::from_euler(
+            EulerRot::XYZ,
+            b3d_node.rotation[0],
+            b3d_node.rotation[1],
+            b3d_node.rotation[2],
+        ),
         scale: b3d_node.scale.into(),
     };
     let mut b3d_error = None;
@@ -142,7 +155,7 @@ fn load_node(
     node.insert(node_name(b3d_node));
 
     node.with_children(|parent| {
-        let mesh = &b3d_node.mesh;
+        // let mesh = &b3d_node.mesh;
 
         let mesh_label = mesh_label(0);
 
@@ -159,11 +172,7 @@ fn load_node(
 
         // append other nodes
         for child in &b3d_node.children {
-            if let Err(err) = load_node(
-                child,
-                parent,
-                load_context
-            ) {
+            if let Err(err) = load_node(child, parent, load_context) {
                 b3d_error = Some(err);
                 return;
             }
@@ -244,7 +253,11 @@ async fn load_texture<'a>(
     let image_path = parent.join(&b3d_texture.file);
     let bytes = load_context.read_asset_bytes(image_path.clone()).await?;
 
-    let extension = Path::new(&b3d_texture.file).extension().unwrap().to_str().unwrap();
+    let extension = Path::new(&b3d_texture.file)
+        .extension()
+        .unwrap()
+        .to_str()
+        .unwrap();
     let image_type = ImageType::Extension(extension);
 
     Ok(Image::from_buffer(

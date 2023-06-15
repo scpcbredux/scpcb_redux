@@ -3,6 +3,9 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct MainMenu;
 
+#[derive(Component)]
+pub struct MainMenuCamera;
+
 // === Buttons ===
 #[derive(Component)]
 pub struct NewGameButton;

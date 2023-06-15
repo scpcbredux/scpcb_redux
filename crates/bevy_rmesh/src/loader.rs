@@ -57,7 +57,7 @@ async fn load_rmesh<'a, 'b>(
     let header = read_rmesh(bytes)?;
 
     let mut meshes = vec![];
-    let mut entity_meshes = vec![];
+    // let mut entity_meshes = vec![];
 
     for i in 0..header.meshes.len() {
         let mesh = &header.meshes[i];
@@ -270,7 +270,7 @@ async fn load_rmesh<'a, 'b>(
 
     load_context.set_default_asset(LoadedAsset::new(Room {
         scene,
-        entity_meshes,
+        // entity_meshes,
         meshes,
     }));
 

@@ -100,15 +100,15 @@ async fn load_xfile<'a, 'b>(
     mesh.set_indices(Some(Indices::U32(indices)));
 
     let mut base_color_texture = None;
-    for mat in assimp_scene.materials {
-        for prop in mat.properties {
-            if let PropertyTypeInfo::String(t) = prop.data {
-                let texture = load_texture(&t, &load_context, supported_compressed_formats).await?;
-                base_color_texture =
-                    Some(load_context.set_labeled_asset("Texture", LoadedAsset::new(texture)));
-            }
-        }
-    }
+    // for mat in assimp_scene.materials {
+    //     for prop in mat.properties {
+    //         if let PropertyTypeInfo::String(t) = prop.data {
+    //             let texture = load_texture(&t, &load_context, supported_compressed_formats).await?;
+    //             base_color_texture =
+    //                 Some(load_context.set_labeled_asset("Texture", LoadedAsset::new(texture)));
+    //         }
+    //     }
+    // }
 
     let handle_mesh = load_context.set_labeled_asset("Mesh", LoadedAsset::new(mesh));
 

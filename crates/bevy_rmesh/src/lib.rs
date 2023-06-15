@@ -19,7 +19,7 @@ impl Plugin for RMeshPlugin {
 pub struct Room {
     pub scene: Handle<Scene>,
     pub meshes: Vec<RoomMesh>,
-    pub entity_meshes: Vec<RoomMesh>,
+    // pub entity_meshes: Vec<RoomMesh>,
 }
 
 #[derive(Debug, TypeUuid)]

@@ -19,8 +19,8 @@ impl Plugin for PlayerPlugin {
         app.init_resource::<MovementSettings>()
             .init_resource::<PlayerInput>()
             .add_systems(
-                (player_input, player_look, player_move)
-                    .in_set(OnUpdate(SimulationState::Running))
+                (player_input, player_look, player_move, player_bob)
+                    .in_set(OnUpdate(SimulationState::Running)),
             );
     }
 }

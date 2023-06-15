@@ -1,10 +1,9 @@
 mod game;
 mod main_menu;
-mod systems;
 
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_b3d::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rmesh::*;
 // use bevy_xfile::*;
 use bevy_rapier3d::prelude::*;
@@ -12,8 +11,6 @@ use bevy_rapier3d::prelude::*;
 use bevy_scene_hook::HookPlugin;
 use game::GamePlugin;
 use main_menu::MainMenuPlugin;
-
-use systems::*;
 
 fn main() {
     App::new()
@@ -37,8 +34,6 @@ fn main() {
         // .add_plugin(XFilePlugin)
         .add_plugin(RMeshPlugin)
         .add_plugin(HookPlugin)
-        // Startup Systems
-        .add_startup_system(spawn_camera)
         .run();
 }
 

@@ -2,8 +2,8 @@ pub mod components;
 mod systems;
 
 // use components::*;
-use systems::*;
 use bevy::prelude::*;
+use systems::*;
 
 pub struct Scp106Plugin;
 

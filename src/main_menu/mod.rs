@@ -1,7 +1,7 @@
 mod components;
+mod resources;
 mod styles;
 mod systems;
-mod resources;
 
 use systems::layout::*;
 
@@ -23,7 +23,7 @@ impl Plugin for MainMenuPlugin {
             // Systems
             .add_systems(
                 (interact_with_new_game_button, interact_with_quit_button)
-                    .in_set(OnUpdate(AppState::MainMenu))
+                    .in_set(OnUpdate(AppState::MainMenu)),
             );
     }
 }
