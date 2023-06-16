@@ -67,7 +67,7 @@ pub fn spawn_map(
 
     // Player
     commands.spawn((
-        Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.1, 0.3),
+        Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.0, 0.3),
         Friction {
             coefficient: 0.0,
             combine_rule: CoefficientCombineRule::Min,

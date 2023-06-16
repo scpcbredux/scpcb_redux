@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
+    pub speed: f32,
     pub walk_speed: f32,
     pub run_speed: f32,
     pub walk_footsteps: Vec<String>,
@@ -12,8 +13,9 @@ pub struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
-            walk_speed: 4.5,
-            run_speed: 8.0,
+            speed: 3.5,
+            walk_speed: 3.5,
+            run_speed: 5.0,
             walk_footsteps: vec![
                 "sounds/sfx/footsteps/step01.ogg".to_string(),
                 "sounds/sfx/footsteps/step02.ogg".to_string(),
@@ -34,7 +36,7 @@ impl Default for Player {
                 "sounds/sfx/footsteps/run07.ogg".to_string(),
                 "sounds/sfx/footsteps/run08.ogg".to_string(),
             ],
-            height: 1.1,
+            height: 1.0,
         }
     }
 }
@@ -42,18 +44,18 @@ impl Default for Player {
 #[derive(Component)]
 pub struct PlayerCamera {
     pub speed: f32,
-    pub amount: Vec2,
+    pub max_bob: Vec2,
     pub tilt: f32,
-    pub bobbing_state: f32,
+    pub timer: f32,
 }
 
 impl Default for PlayerCamera {
     fn default() -> Self {
         Self {
-            speed: 0.035,
-            amount: Vec2::splat(3.0),
+            speed: 3.5,
+            max_bob: Vec2::splat(0.03),
             tilt: 2.0f32.to_radians(),
-            bobbing_state: 0.0,
+            timer: 0.0,
         }
     }
 }

@@ -1,4 +1,4 @@
-use bevy::{input::mouse::MouseMotion, math::Vec3Swizzles, prelude::*};
+use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
 use std::f32::consts::*;
 
@@ -50,43 +50,41 @@ pub fn player_look(
     }
 }
 
-pub fn player_move(mut query: Query<(&Player, &mut Velocity)>, input: Res<PlayerInput>) {
-    for (player, mut velocity) in &mut query {
+pub fn player_move(mut query: Query<(&mut Player, &mut Velocity)>, input: Res<PlayerInput>) {
+    for (mut player, mut velocity) in &mut query {
         let mut test = Mat3::from_axis_angle(Vec3::Y, input.yaw);
         test.z_axis *= -1.0;
 
-        let speed = if input.sprinting {
+        player.speed = if input.sprinting {
             player.run_speed
         } else {
             player.walk_speed
         };
-        velocity.linvel = test * input.movement * speed;
+        velocity.linvel = test * input.movement * player.speed;
     }
 }
 
 pub fn player_bob(
+    time: Res<Time>,
     mut camera_query: Query<(&mut PlayerCamera, &mut Transform), Without<Player>>,
-    player_query: Query<&Velocity, (With<Player>, Without<PlayerCamera>)>,
+    player_query: Query<(&Velocity, &Player), Without<PlayerCamera>>,
 ) {
-    if let Ok(player_velocity) = player_query.get_single() {
-        let move_distance_squared = player_velocity.linvel.xz().length_squared();
+    let dt = time.delta_seconds();
 
+    for (player_velocity, player) in &player_query {
         for (mut camera, mut transform) in &mut camera_query {
-            let adjusted_move_speed = 1.0 + move_distance_squared.ln() / 3.0;
+            camera.timer += dt * player_velocity.linvel.length() / player.speed;
 
-            // let off = Vec3::new(
-            //     -(camera.bobbing_state * camera.speed).sin() * camera.amount.y,
-            //     (camera.bobbing_state * camera.speed / 2.0).cos() * camera.amount.x,
-            //     0.0,
-            // );
+            let off = Vec3::new(
+                (camera.timer * camera.speed / 2.0).cos(),
+                -(camera.timer * camera.speed).sin(),
+                0.0,
+            );
 
-            let rot = -(camera.bobbing_state * camera.speed / 2.0).cos() * camera.tilt;
-
-            camera.bobbing_state += (adjusted_move_speed).max(0.0);
-            camera.bobbing_state %= (PI / 2.0) / (camera.speed / 2.0);
+            let rot = -(camera.timer * camera.speed / 2.0).cos() * camera.tilt;
 
             transform.rotate_z(rot);
-            // transform.translation += off;
+            transform.translation += off * camera.max_bob.extend(0.0);
         }
     }
 }
