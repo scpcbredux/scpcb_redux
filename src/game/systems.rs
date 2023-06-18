@@ -4,7 +4,7 @@ use bevy::{
     window::CursorGrabMode,
 };
 use bevy_rapier3d::prelude::*;
-use bevy_rmesh::ROOM_SCALE;
+use bevy_rmesh::rmesh::ROOM_SCALE;
 use bevy_scene_hook::{HookedSceneBundle, SceneHook};
 
 use super::{components::Map, player::*, SimulationState};
