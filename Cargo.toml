@@ -8,7 +8,7 @@ members = ["crates/*"]
 resolver = "2"
 
 [dependencies]
-bevy_b3d = { path = "crates/bevy_b3d" }
+bevy_b3d = "0.1.0"
 bevy_rmesh = "0.1.2"
 # bevy_xfile = { path = "crates/bevy_xfile" }
 bevy_rapier3d = "0.21.0"
@@ -26,4 +26,3 @@ opt-level = 1
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
-
