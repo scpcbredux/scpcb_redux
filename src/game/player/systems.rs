@@ -1,40 +1,42 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::prelude::*;
+use leafwing_input_manager::prelude::*;
 use std::f32::consts::*;
 
 use crate::game::player::{components::*, resources::*, ANGLE_EPSILON};
 
 pub fn player_input(
-    settings: Res<MovementSettings>,
-    keys: Res<Input<KeyCode>>,
+    query: Query<&ActionState<PlayerAction>, With<Player>>,
     windows: Query<&mut Window>,
     mut motion_evr: EventReader<MouseMotion>,
     mut input: ResMut<PlayerInput>,
 ) {
-    let window = windows.single();
-    if window.focused {
-        let mut delta = Vec2::ZERO;
-        for ev in motion_evr.iter() {
-            delta += ev.delta;
+    if let Ok(action_state) = query.get_single() {
+        let window = windows.single();
+        if window.focused {
+            let mut delta = Vec2::ZERO;
+            for ev in motion_evr.iter() {
+                delta += ev.delta;
+            }
+            delta *= MOUSE_SENSITIVITY;
+    
+            input.pitch =
+                (input.pitch - delta.y).clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
+            input.yaw -= delta.x;
+            if input.yaw.abs() > PI {
+                input.yaw = input.yaw.rem_euclid(TAU);
+            }
         }
-        delta *= settings.sensitivity;
-
-        input.pitch =
-            (input.pitch - delta.y).clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
-        input.yaw -= delta.x;
-        if input.yaw.abs() > PI {
-            input.yaw = input.yaw.rem_euclid(TAU);
-        }
+    
+        input.movement = Vec3::new(
+            get_input_axis(PlayerAction::MoveRight, PlayerAction::MoveLeft, action_state),
+            0.0,
+            get_input_axis(PlayerAction::MoveUp, PlayerAction::MoveDown, action_state),
+        )
+        .normalize_or_zero();
+    
+        input.sprinting = action_state.pressed(PlayerAction::Sprint);
     }
-
-    input.movement = Vec3::new(
-        get_input_axis(settings.key_right, settings.key_left, &keys),
-        0.0,
-        get_input_axis(settings.key_up, settings.key_down, &keys),
-    )
-    .normalize_or_zero();
-
-    input.sprinting = keys.pressed(settings.key_sprint);
 }
 
 pub fn player_look(
@@ -52,15 +54,15 @@ pub fn player_look(
 
 pub fn player_move(mut query: Query<(&mut Player, &mut Velocity)>, input: Res<PlayerInput>) {
     for (mut player, mut velocity) in &mut query {
-        let mut test = Mat3::from_axis_angle(Vec3::Y, input.yaw);
-        test.z_axis *= -1.0;
+        let mut move_to_world = Mat3::from_axis_angle(Vec3::Y, input.yaw);
+        move_to_world.z_axis *= -1.0;
 
         player.speed = if input.sprinting {
             player.run_speed
         } else {
             player.walk_speed
         };
-        velocity.linvel = test * input.movement * player.speed;
+        velocity.linvel = move_to_world * (input.movement * player.speed);
     }
 }
 
@@ -84,17 +86,17 @@ pub fn player_bob(
             let rot = -(camera.timer * camera.speed / 2.0).cos() * camera.tilt;
 
             transform.rotate_z(rot);
-            transform.translation += off * camera.max_bob.extend(0.0);
+            transform.translation += off * camera.max_bob;
         }
     }
 }
 
-pub fn get_input_axis(pkey: KeyCode, skey: KeyCode, keys: &Res<Input<KeyCode>>) -> f32 {
-    get_input_value(pkey, keys) - get_input_value(skey, keys)
+fn get_input_axis<A: Actionlike>(paction: A, saction: A, action_state: &ActionState<A>) -> f32 {
+    get_input_value(paction, action_state) - get_input_value(saction, action_state)
 }
 
-pub fn get_input_value(key: KeyCode, keys: &Res<Input<KeyCode>>) -> f32 {
-    if keys.pressed(key) {
+fn get_input_value<A: Actionlike>(action: A, action_state: &ActionState<A>) -> f32 {
+    if action_state.pressed(action) {
         1.0
     } else {
         0.0

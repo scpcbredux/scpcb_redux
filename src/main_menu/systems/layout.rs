@@ -1,20 +1,18 @@
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 
 use crate::main_menu::{components::*, resources::*, styles::*};
 
 pub fn spawn_main_menu(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    audio: Res<Audio>,
-    audio_sinks: Res<Assets<AudioSink>>,
+    background: Res<AudioChannel<Background>>,
 ) {
     let _main_menu_entity = build_main_menu(&mut commands, &asset_server);
 
-    let handle = audio_sinks.get_handle(audio.play_with_settings(
-        asset_server.load("sounds/music/menu.ogg"),
-        PlaybackSettings::LOOP,
-    ));
-    commands.insert_resource(MusicController(handle));
+    background
+        .play(asset_server.load("sounds/music/menu.ogg"))
+        .looped();
 
     commands.spawn((Camera2dBundle::default(), MainMenuCamera));
 }
@@ -23,12 +21,9 @@ pub fn despawn_main_menu(
     mut commands: Commands,
     main_menu_query: Query<Entity, (With<MainMenu>, Without<MainMenuCamera>)>,
     main_menu_camera_query: Query<Entity, (With<MainMenuCamera>, Without<MainMenu>)>,
-    audio_sinks: Res<Assets<AudioSink>>,
-    music_controller: Res<MusicController>,
+    background: Res<AudioChannel<Background>>,
 ) {
-    if let Some(sink) = audio_sinks.get(&music_controller.0) {
-        sink.toggle();
-    }
+    background.stop();
 
     if let Ok(main_menu_entity) = main_menu_query.get_single() {
         commands.entity(main_menu_entity).despawn_recursive();

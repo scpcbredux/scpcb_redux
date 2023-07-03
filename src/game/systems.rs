@@ -1,11 +1,8 @@
-use bevy::{
-    ecs::{system::EntityCommands, world::EntityRef},
-    prelude::*,
-    window::CursorGrabMode,
-};
+use bevy::{prelude::*, window::CursorGrabMode, ecs::{world::EntityRef, system::EntityCommands}};
 use bevy_rapier3d::prelude::*;
 use bevy_rmesh::rmesh::ROOM_SCALE;
 use bevy_scene_hook::{HookedSceneBundle, SceneHook};
+use leafwing_input_manager::prelude::*;
 
 use super::{components::Map, player::*, SimulationState};
 
@@ -51,19 +48,27 @@ pub fn spawn_map(
     window.cursor.grab_mode = CursorGrabMode::None;
 
     // SCP-106
-    commands.spawn((
-        PbrBundle {
-            mesh: asset_server.load("npcs/106_2.b3d#Mesh0"),
-            material: materials.add(StandardMaterial {
-                base_color_texture: Some(asset_server.load("npcs/106_diffuse.jpg")),
-                normal_map_texture: Some(asset_server.load("npcs/106_normals.png")),
+    commands
+        .spawn((
+            Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.0, 0.3),
+            RigidBody::Fixed,
+            TransformBundle::default(),
+            Visibility::default(),
+            ComputedVisibility::default(),
+            Map,
+        ))
+        .with_children(|parent| {
+            parent.spawn(PbrBundle {
+                mesh: asset_server.load("npcs/106_2.b3d#Mesh0"),
+                material: materials.add(StandardMaterial {
+                    base_color_texture: Some(asset_server.load("npcs/106_diffuse.jpg")),
+                    normal_map_texture: Some(asset_server.load("npcs/106_normals.png")),
+                    ..Default::default()
+                }),
+                transform: Transform::from_scale(Vec3::ONE * (0.25 / 2.2)),
                 ..Default::default()
-            }),
-            transform: Transform::from_scale(Vec3::ONE * (0.25 / 2.2)),
-            ..Default::default()
-        },
-        Map,
-    ));
+            });
+        });
 
     // Player
     commands.spawn((
@@ -85,6 +90,20 @@ pub fn spawn_map(
         GravityScale(0.0),
         Ccd { enabled: true },
         TransformBundle::from(Transform::from_translation((1.8, 0., 1.5).into())),
+        InputManagerBundle::<PlayerAction> {
+            action_state: ActionState::default(),
+            input_map: InputMap::new([
+                (KeyCode::W, PlayerAction::MoveUp),
+                (KeyCode::S, PlayerAction::MoveDown),
+                (KeyCode::A, PlayerAction::MoveLeft),
+                (KeyCode::D, PlayerAction::MoveRight),
+                (KeyCode::Space, PlayerAction::Blink),
+                (KeyCode::LShift, PlayerAction::Sprint),
+                (KeyCode::Tab, PlayerAction::Inventory),
+                (KeyCode::LControl, PlayerAction::Crouch),
+                (KeyCode::F3, PlayerAction::Console),
+            ]),
+        },
         Player::default(),
         Map,
     ));
@@ -124,25 +143,7 @@ pub fn despawn_map(mut commands: Commands, query: Query<Entity, With<Map>>) {
 }
 
 fn scene_collider_hook(entity: &EntityRef, cmds: &mut EntityCommands) {
-    // if let Some(meshes) = entity.world().get_resource::<Assets<Mesh>>() {
-    //     if let Some(mesh) = entity.get::<Handle<Mesh>>() {
-    //         cmds.insert((
-    //             Collider::from_bevy_mesh(meshes.get(mesh).unwrap(), &ComputedColliderShape::TriMesh).unwrap(),
-    //             RigidBody::Fixed,
-    //         ));
-    //     }
+    // if entity.contains::<Handle<Mesh>>() {
+    //     cmds.insert(AsyncCollider::default());
     // }
-    if let Some(meshes) = entity.world().get_resource::<Assets<Mesh>>() {
-        if let Some(handle_mesh) = entity.get::<Handle<Mesh>>() {
-            if let Some(mesh) = meshes.get(handle_mesh) {
-                // info!("Mesh Vertices Count: {:#?}", mesh.count_vertices());
-                if mesh.count_vertices() == 1485 {
-                    cmds.insert((
-                        Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap(),
-                        RigidBody::Fixed,
-                    ));
-                }
-            }
-        }
-    }
 }

@@ -16,7 +16,7 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<MovementSettings>()
+        app
             .init_resource::<PlayerInput>()
             .add_systems(
                 (player_input, player_look, player_move, player_bob)

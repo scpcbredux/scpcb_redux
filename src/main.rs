@@ -4,12 +4,14 @@ mod main_menu;
 use bevy::prelude::*;
 use bevy_b3d::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_kira_audio::prelude::*;
 use bevy_rmesh::*;
 // use bevy_xfile::*;
 use bevy_rapier3d::prelude::*;
-
 use bevy_scene_hook::HookPlugin;
-use game::GamePlugin;
+use leafwing_input_manager::prelude::*;
+
+use game::{player::PlayerAction, GamePlugin};
 use main_menu::MainMenuPlugin;
 
 fn main() {
@@ -29,11 +31,14 @@ fn main() {
         .add_plugin(GamePlugin)
         // Other Plugins
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+        // .add_plugin(RapierDebugRenderPlugin::default())
+        .add_plugin(InputManagerPlugin::<PlayerAction>::default())
         .add_plugin(WorldInspectorPlugin::default())
+        .add_plugin(HookPlugin)
+        .add_plugin(AudioPlugin)
         .add_plugin(B3DPlugin)
         // .add_plugin(XFilePlugin)
         .add_plugin(RMeshPlugin)
-        .add_plugin(HookPlugin)
         .run();
 }
 

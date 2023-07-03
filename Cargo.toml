@@ -8,16 +8,38 @@ members = ["crates/*"]
 resolver = "2"
 
 [dependencies]
-bevy_b3d = "0.1.0"
-bevy_rmesh = "0.1.2"
+bevy_kira_audio = "0.15.0"
+bevy_b3d = "0.1.1"
+bevy_rmesh = "0.1.3"
 # bevy_xfile = { path = "crates/bevy_xfile" }
 bevy_rapier3d = "0.21.0"
 bevy-scene-hook = "6.0.0"
 bevy-inspector-egui = "0.18.3"
+leafwing-input-manager = "0.9.3"
 
 [dependencies.bevy]
 version = "0.10.1"
-features = ["jpeg", "wayland"]
+default-features = false
+features = [
+    "animation",
+    "bevy_asset",
+    "bevy_scene",
+    "bevy_winit",
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "png",
+    "jpeg",
+    "hdr",
+    "ktx2",
+    "zstd",
+    "x11",
+    "wayland",
+    "tonemapping_luts",
+]
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
