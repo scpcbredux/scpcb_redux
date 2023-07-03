@@ -35,13 +35,7 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
         .with_children(|parent| {
             parent
                 .spawn(ImageBundle {
-                    style: Style {
-                        size: Size {
-                            width: Val::Px(420.0),
-                            height: Val::Px(420.0),
-                        },
-                        ..default()
-                    },
+                    style: PAUSE_BACKGROUND_STYLE,
                     image: asset_server.load("ui/game/pause_menu.jpg").into(),
                     ..default()
                 })

@@ -17,16 +17,24 @@ pub const BUTTON_BACK_STYLE: Style = Style {
 pub const BUTTON_FONT_COLOR: Color = Color::WHITE;
 pub const BUTTON_FONT_SIZE: f32 = 44.0;
 
+pub const PAUSE_BACKGROUND_STYLE: Style = Style {
+    size: Size {
+        width: Val::Px(420.0),
+        height: Val::Px(420.0),
+    },
+    flex_direction: FlexDirection::Column,
+    ..Style::DEFAULT
+};
+
 pub const NODE_ITEMS_STYLE: Style = Style {
     flex_direction: FlexDirection::Column,
     justify_content: JustifyContent::Start,
-    align_items: AlignItems::Start,
-    border: UiRect {
-        top: Val::Px(200.0),
-        left: Val::Px(112.0),
+    align_items: AlignItems::Center,
+    position: UiRect {
+        left: Val::Px(28.0),
+        top: Val::Px(20.0),
         ..UiRect::DEFAULT
     },
-    size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
     gap: Size::new(Val::Px(20.0), Val::Px(20.0)),
     ..Style::DEFAULT
 };
