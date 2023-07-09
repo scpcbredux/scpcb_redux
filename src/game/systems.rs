@@ -1,4 +1,8 @@
-use bevy::{prelude::*, window::CursorGrabMode, ecs::{world::EntityRef, system::EntityCommands}};
+use bevy::{
+    ecs::{system::EntityCommands, world::EntityRef},
+    prelude::*,
+    window::CursorGrabMode,
+};
 use bevy_rapier3d::prelude::*;
 use bevy_rmesh::rmesh::ROOM_SCALE;
 use bevy_scene_hook::{HookedSceneBundle, SceneHook};
@@ -82,7 +86,6 @@ pub fn spawn_map(
             combine_rule: CoefficientCombineRule::Min,
         },
         ActiveEvents::COLLISION_EVENTS,
-        Velocity::zero(),
         RigidBody::Dynamic,
         Sleeping::disabled(),
         LockedAxes::ROTATION_LOCKED,
@@ -90,21 +93,7 @@ pub fn spawn_map(
         GravityScale(0.0),
         Ccd { enabled: true },
         TransformBundle::from(Transform::from_translation((1.8, 0., 1.5).into())),
-        InputManagerBundle::<PlayerAction> {
-            action_state: ActionState::default(),
-            input_map: InputMap::new([
-                (KeyCode::W, PlayerAction::MoveUp),
-                (KeyCode::S, PlayerAction::MoveDown),
-                (KeyCode::A, PlayerAction::MoveLeft),
-                (KeyCode::D, PlayerAction::MoveRight),
-                (KeyCode::Space, PlayerAction::Blink),
-                (KeyCode::LShift, PlayerAction::Sprint),
-                (KeyCode::Tab, PlayerAction::Inventory),
-                (KeyCode::LControl, PlayerAction::Crouch),
-                (KeyCode::F3, PlayerAction::Console),
-            ]),
-        },
-        Player::default(),
+        PlayerBundle::default(),
         Map,
     ));
 

@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-pub const MOUSE_SENSITIVITY: f32 = 0.003;
-
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub enum PlayerAction {
     MoveUp,

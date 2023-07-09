@@ -16,6 +16,7 @@ bevy_rapier3d = "0.21.0"
 bevy-scene-hook = "6.0.0"
 bevy-inspector-egui = "0.18.3"
 leafwing-input-manager = "0.9.3"
+rand = "0.8.5"
 
 [dependencies.bevy]
 version = "0.10.1"

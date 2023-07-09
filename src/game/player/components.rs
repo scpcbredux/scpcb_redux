@@ -5,10 +5,9 @@ pub struct Player {
     pub speed: f32,
     pub walk_speed: f32,
     pub run_speed: f32,
-    pub walk_footsteps: Vec<String>,
-    pub run_footsteps: Vec<String>,
     pub height: f32,
     pub crouch_state: f32,
+    pub mouse_sensitivity: f32,
 }
 
 impl Default for Player {
@@ -17,6 +16,24 @@ impl Default for Player {
             speed: 2.5,
             walk_speed: 2.5,
             run_speed: 4.0,
+            height: 1.0,
+            crouch_state: 0.0,
+            mouse_sensitivity: 0.003,
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct PlayerFootsteps {
+    pub walk_footsteps: Vec<String>,
+    pub run_footsteps: Vec<String>,
+    pub timer: f32,
+    pub delay: f32,
+}
+
+impl Default for PlayerFootsteps {
+    fn default() -> Self {
+        Self {
             walk_footsteps: vec![
                 "sounds/sfx/footsteps/step01.ogg".to_string(),
                 "sounds/sfx/footsteps/step02.ogg".to_string(),
@@ -37,8 +54,8 @@ impl Default for Player {
                 "sounds/sfx/footsteps/run07.ogg".to_string(),
                 "sounds/sfx/footsteps/run08.ogg".to_string(),
             ],
-            height: 1.0,
-            crouch_state: 0.0,
+            timer: 0.0,
+            delay: 0.6,
         }
     }
 }

@@ -1,7 +1,9 @@
+mod bundles;
 mod components;
 mod resources;
 mod systems;
 
+pub use bundles::*;
 pub use components::*;
 pub use resources::*;
 pub use systems::*;
@@ -16,11 +18,15 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<PlayerInput>()
-            .add_systems(
-                (player_input, player_look, player_move, player_bob)
-                    .in_set(OnUpdate(SimulationState::Running)),
-            );
+        app.init_resource::<PlayerInput>().add_systems(
+            (
+                player_input,
+                player_look,
+                player_move,
+                player_bob,
+                player_footsteps,
+            )
+                .in_set(OnUpdate(SimulationState::Running)),
+        );
     }
 }

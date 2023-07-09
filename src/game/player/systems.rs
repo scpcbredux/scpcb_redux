@@ -1,40 +1,46 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
+use bevy_kira_audio::prelude::*;
 use bevy_rapier3d::prelude::*;
 use leafwing_input_manager::prelude::*;
-use std::f32::consts::*;
+use rand::seq::SliceRandom;
+use std::{f32::consts::*, time::Duration};
 
 use crate::game::player::{components::*, resources::*, ANGLE_EPSILON};
 
 pub fn player_input(
-    query: Query<&ActionState<PlayerAction>, With<Player>>,
+    query: Query<(&ActionState<PlayerAction>, &Player)>,
     windows: Query<&mut Window>,
     mut motion_evr: EventReader<MouseMotion>,
     mut input: ResMut<PlayerInput>,
 ) {
-    if let Ok(action_state) = query.get_single() {
+    for (action_state, player) in &query {
         let window = windows.single();
         if window.focused {
             let mut delta = Vec2::ZERO;
             for ev in motion_evr.iter() {
                 delta += ev.delta;
             }
-            delta *= MOUSE_SENSITIVITY;
-    
-            input.pitch =
-                (input.pitch - delta.y).clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
+            delta *= player.mouse_sensitivity;
+
+            input.pitch = (input.pitch - delta.y)
+                .clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
             input.yaw -= delta.x;
             if input.yaw.abs() > PI {
                 input.yaw = input.yaw.rem_euclid(TAU);
             }
         }
-    
+
         input.movement = Vec3::new(
-            get_input_axis(PlayerAction::MoveRight, PlayerAction::MoveLeft, action_state),
+            get_input_axis(
+                PlayerAction::MoveRight,
+                PlayerAction::MoveLeft,
+                action_state,
+            ),
             0.0,
             get_input_axis(PlayerAction::MoveUp, PlayerAction::MoveDown, action_state),
         )
         .normalize_or_zero();
-    
+
         input.sprinting = action_state.pressed(PlayerAction::Sprint);
     }
 }
@@ -87,6 +93,37 @@ pub fn player_bob(
 
             transform.rotate_z(rot);
             transform.translation += off * camera.max_bob;
+        }
+    }
+}
+
+pub fn player_footsteps(
+    time: Res<Time>,
+    asset_server: Res<AssetServer>,
+    mut query: Query<(&Player, &Velocity, &mut PlayerFootsteps)>,
+    audio: Res<Audio>,
+    input: Res<PlayerInput>,
+) {
+    let dt = time.delta_seconds();
+
+    for (player, velocity, mut footsteps) in &mut query {
+        let mut rng = rand::thread_rng();
+
+        // if velocity.linvel.length() > 0.0 {
+        footsteps.timer += dt * velocity.linvel.length() / player.speed;
+        // }
+
+        if footsteps.timer > footsteps.delay {
+            let rand_step = if input.sprinting {
+                footsteps.run_footsteps.choose(&mut rng)
+            } else {
+                footsteps.walk_footsteps.choose(&mut rng)
+            };
+
+            if let Some(rand_step) = rand_step {
+                audio.play(asset_server.load(rand_step));
+            }
+            footsteps.timer = 0.0;
         }
     }
 }
