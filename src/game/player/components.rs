@@ -15,7 +15,7 @@ impl Default for Player {
         Self {
             speed: 2.5,
             walk_speed: 2.5,
-            run_speed: 4.0,
+            run_speed: 4.5,
             height: 1.0,
             crouch_state: 0.0,
             mouse_sensitivity: 0.003,
@@ -55,7 +55,7 @@ impl Default for PlayerFootsteps {
                 "sounds/sfx/footsteps/run08.ogg".to_string(),
             ],
             timer: 0.0,
-            delay: 0.6,
+            delay: 0.7,
         }
     }
 }

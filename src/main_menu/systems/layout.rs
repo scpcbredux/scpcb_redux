@@ -48,7 +48,8 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
             parent.spawn(ImageBundle {
                 style: Style {
                     position_type: PositionType::Absolute,
-                    size: Size::new(Val::Px(888.0), Val::Px(657.0)),
+                    width: Val::Px(888.0),
+                    height: Val::Px(657.0),
                     ..default()
                 },
                 image: asset_server.load("ui/menu/back.jpg").into(),

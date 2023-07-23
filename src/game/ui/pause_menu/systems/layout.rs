@@ -24,7 +24,8 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
-                    size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
                     ..default()
                 },
                 // image: asset_server.load("pause_menu.png").into(),

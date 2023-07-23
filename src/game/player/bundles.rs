@@ -8,7 +8,6 @@ use super::{components::*, resources::*};
 pub struct PlayerBundle {
     pub player: Player,
     pub footsteps: PlayerFootsteps,
-    #[bundle]
     pub input_bundle: InputManagerBundle<PlayerAction>,
     pub velocity: Velocity,
 }
@@ -26,9 +25,9 @@ impl Default for PlayerBundle {
                     (KeyCode::A, PlayerAction::MoveLeft),
                     (KeyCode::D, PlayerAction::MoveRight),
                     (KeyCode::Space, PlayerAction::Blink),
-                    (KeyCode::LShift, PlayerAction::Sprint),
+                    (KeyCode::ShiftLeft, PlayerAction::Sprint),
                     (KeyCode::Tab, PlayerAction::Inventory),
-                    (KeyCode::LControl, PlayerAction::Crouch),
+                    (KeyCode::ControlLeft, PlayerAction::Crouch),
                     (KeyCode::F3, PlayerAction::Console),
                 ]),
             },

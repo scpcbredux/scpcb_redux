@@ -3,7 +3,7 @@ use bevy_kira_audio::prelude::*;
 use bevy_rapier3d::prelude::*;
 use leafwing_input_manager::prelude::*;
 use rand::seq::SliceRandom;
-use std::{f32::consts::*, time::Duration};
+use std::f32::consts::*;
 
 use crate::game::player::{components::*, resources::*, ANGLE_EPSILON};
 
@@ -109,9 +109,7 @@ pub fn player_footsteps(
     for (player, velocity, mut footsteps) in &mut query {
         let mut rng = rand::thread_rng();
 
-        // if velocity.linvel.length() > 0.0 {
         footsteps.timer += dt * velocity.linvel.length() / player.speed;
-        // }
 
         if footsteps.timer > footsteps.delay {
             let rand_step = if input.sprinting {

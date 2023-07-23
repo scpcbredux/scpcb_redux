@@ -12,7 +12,7 @@ impl Plugin for GameUiPlugin {
     fn build(&self, app: &mut App) {
         app
             // Plugins
-            .add_plugin(HudPlugin)
-            .add_plugin(PauseMenuPlugin);
+            .add_plugins(HudPlugin)
+            .add_plugins(PauseMenuPlugin);
     }
 }

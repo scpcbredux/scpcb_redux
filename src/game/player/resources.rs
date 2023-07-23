@@ -1,7 +1,7 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, reflect::TypePath};
 use leafwing_input_manager::prelude::*;
 
-#[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug)]
+#[derive(Actionlike, TypePath, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub enum PlayerAction {
     MoveUp,
     MoveDown,

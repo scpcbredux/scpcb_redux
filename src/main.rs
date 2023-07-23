@@ -27,18 +27,16 @@ fn main() {
         }))
         .add_state::<AppState>()
         // SCPCB Redux Plugins
-        .add_plugin(MainMenuPlugin)
-        .add_plugin(GamePlugin)
+        .add_plugins((MainMenuPlugin, GamePlugin))
+        // File Formats
+        .add_plugins((B3DPlugin, /* XFilePlugin, */ RMeshPlugin))
         // Other Plugins
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        // .add_plugin(RapierDebugRenderPlugin::default())
-        .add_plugin(InputManagerPlugin::<PlayerAction>::default())
-        .add_plugin(WorldInspectorPlugin::default())
-        .add_plugin(HookPlugin)
-        .add_plugin(AudioPlugin)
-        .add_plugin(B3DPlugin)
-        // .add_plugin(XFilePlugin)
-        .add_plugin(RMeshPlugin)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        // .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(InputManagerPlugin::<PlayerAction>::default())
+        .add_plugins(WorldInspectorPlugin::default())
+        .add_plugins(HookPlugin)
+        .add_plugins(AudioPlugin)
         .run();
 }
 

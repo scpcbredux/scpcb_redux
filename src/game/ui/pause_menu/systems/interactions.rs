@@ -14,7 +14,7 @@ pub fn interact_with_resume_button(
         let mut window = windows.single_mut();
 
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 window.cursor.visible = false;
                 window.cursor.grab_mode = CursorGrabMode::Locked;
 
@@ -32,7 +32,7 @@ pub fn interact_with_quit_button(
 ) {
     if let Ok(interaction) = button_query.get_single() {
         match *interaction {
-            Interaction::Clicked => next_app_state.set(AppState::MainMenu),
+            Interaction::Pressed => next_app_state.set(AppState::MainMenu),
             Interaction::Hovered => {}
             Interaction::None => {}
         }

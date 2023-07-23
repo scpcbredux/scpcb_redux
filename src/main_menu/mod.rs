@@ -21,13 +21,14 @@ impl Plugin for MainMenuPlugin {
             // Audio Channel
             .add_audio_channel::<Background>()
             // OnEnter State Systems
-            .add_system(spawn_main_menu.in_schedule(OnEnter(AppState::MainMenu)))
+            .add_systems(OnEnter(AppState::MainMenu), spawn_main_menu)
             // OnExit State Systems
-            .add_system(despawn_main_menu.in_schedule(OnExit(AppState::MainMenu)))
+            .add_systems(OnExit(AppState::MainMenu), despawn_main_menu)
             // Systems
             .add_systems(
+                Update,
                 (interact_with_new_game_button, interact_with_quit_button)
-                    .in_set(OnUpdate(AppState::MainMenu)),
+                    .run_if(in_state(AppState::MainMenu)),
             );
     }
 }

@@ -6,9 +6,8 @@ use bevy::{
 use bevy_rapier3d::prelude::*;
 use bevy_rmesh::rmesh::ROOM_SCALE;
 use bevy_scene_hook::{HookedSceneBundle, SceneHook};
-use leafwing_input_manager::prelude::*;
 
-use super::{components::Map, player::*, SimulationState};
+use super::{components::Map, player::*, scps::scp_106::components::Scp106, SimulationState};
 
 pub fn pause_simulation(mut simulation_state_next_state: ResMut<NextState<SimulationState>>) {
     simulation_state_next_state.set(SimulationState::Paused);
@@ -27,12 +26,12 @@ pub fn toggle_simulation(
     if keyboard_input.just_pressed(KeyCode::Escape) {
         let mut window = windows.single_mut();
 
-        if simulation_state.0 == SimulationState::Running {
+        if simulation_state.eq(&SimulationState::Running) {
             window.cursor.visible = true;
             window.cursor.grab_mode = CursorGrabMode::None;
 
             next_simulation_state.set(SimulationState::Paused);
-        } else if simulation_state.0 == SimulationState::Paused {
+        } else if simulation_state.eq(&SimulationState::Paused) {
             window.cursor.visible = false;
             window.cursor.grab_mode = CursorGrabMode::Locked;
 
@@ -59,6 +58,7 @@ pub fn spawn_map(
             TransformBundle::default(),
             Visibility::default(),
             ComputedVisibility::default(),
+            Scp106::default(),
             Map,
         ))
         .with_children(|parent| {
@@ -131,7 +131,7 @@ pub fn despawn_map(mut commands: Commands, query: Query<Entity, With<Map>>) {
     }
 }
 
-fn scene_collider_hook(entity: &EntityRef, cmds: &mut EntityCommands) {
+fn scene_collider_hook(_entity: &EntityRef, _cmds: &mut EntityCommands) {
     // if entity.contains::<Handle<Mesh>>() {
     //     cmds.insert(AsyncCollider::default());
     // }

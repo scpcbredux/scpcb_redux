@@ -2,7 +2,10 @@ pub use loader::*;
 
 mod loader;
 
-use bevy::{prelude::*, reflect::TypeUuid};
+use bevy::{
+    prelude::*,
+    reflect::{TypePath, TypeUuid},
+};
 
 pub struct XFilePlugin;
 
@@ -12,7 +15,7 @@ impl Plugin for XFilePlugin {
     }
 }
 
-#[derive(Debug, TypeUuid)]
+#[derive(Debug, TypeUuid, TypePath)]
 #[uuid = "14c685d6-35d1-43e9-8940-1ef9d039756b"]
 pub struct XFile {
     pub scene: Handle<Scene>,

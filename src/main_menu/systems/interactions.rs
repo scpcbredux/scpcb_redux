@@ -8,7 +8,7 @@ pub fn interact_with_new_game_button(
 ) {
     if let Ok(interaction) = button_query.get_single() {
         match *interaction {
-            Interaction::Clicked => next_app_state.set(AppState::Game),
+            Interaction::Pressed => next_app_state.set(AppState::Game),
             Interaction::Hovered => {}
             Interaction::None => {}
         }
@@ -21,7 +21,7 @@ pub fn interact_with_quit_button(
 ) {
     if let Ok(interaction) = button_query.get_single() {
         match *interaction {
-            Interaction::Clicked => app_exit_event_writer.send(AppExit),
+            Interaction::Pressed => app_exit_event_writer.send(AppExit),
             Interaction::Hovered => {}
             Interaction::None => {}
         }

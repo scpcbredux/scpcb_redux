@@ -16,13 +16,14 @@ impl Plugin for PauseMenuPlugin {
     fn build(&self, app: &mut App) {
         app
             // OnEnter State System
-            .add_system(spawn_pause_menu.in_schedule(OnEnter(SimulationState::Paused)))
+            .add_systems(OnEnter(SimulationState::Paused), spawn_pause_menu)
             // OnExit State System
-            .add_system(despawn_pause_menu.in_schedule(OnExit(SimulationState::Paused)))
+            .add_systems(OnExit(SimulationState::Paused), despawn_pause_menu)
             // Systems
             .add_systems(
+                Update,
                 (interact_with_resume_button, interact_with_quit_button)
-                    .in_set(OnUpdate(SimulationState::Paused)),
+                    .run_if(in_state(SimulationState::Paused)),
             );
     }
 }

@@ -9,6 +9,6 @@ pub struct Scp106Plugin;
 
 impl Plugin for Scp106Plugin {
     fn build(&self, app: &mut App) {
-        app.add_system(scp106_update);
+        app.add_systems(Update, scp106_update);
     }
 }

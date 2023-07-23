@@ -19,6 +19,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerInput>().add_systems(
+            Update,
             (
                 player_input,
                 player_look,
@@ -26,7 +27,7 @@ impl Plugin for PlayerPlugin {
                 player_bob,
                 player_footsteps,
             )
-                .in_set(OnUpdate(SimulationState::Running)),
+                .run_if(in_state(SimulationState::Running)),
         );
     }
 }
