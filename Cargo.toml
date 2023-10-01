@@ -3,27 +3,27 @@ name = "scpcb_redux"
 version = "0.1.0"
 edition = "2021"
 
-[workspace]
-members = ["crates/*"]
-resolver = "2"
+# [workspace]
+# members = ["crates/*"]
+# resolver = "2"
 
 [dependencies]
-bevy_kira_audio = "0.16.0"
 bevy_b3d = "0.2.0"
 bevy_rmesh = "0.2.0"
 # bevy_xfile = { path = "crates/bevy_xfile" }
-bevy_rapier3d = "0.22.0"
-bevy-scene-hook = "7.0.0"
+bevy_xpbd_3d = "0.2.0"
 bevy-inspector-egui = "0.19.0"
 leafwing-input-manager = "0.10.0"
 rand = "0.8.5"
 
 [dependencies.bevy]
-version = "0.11.0"
+version = "0.11.3"
 default-features = false
+
 features = [
     "animation",
     "bevy_asset",
+    "bevy_audio",
     "bevy_scene",
     "bevy_winit",
     "bevy_core_pipeline",
@@ -40,6 +40,7 @@ features = [
     "x11",
     "wayland",
     "tonemapping_luts",
+    "wav",
 ]
 
 # Enable a small amount of optimization in debug mode

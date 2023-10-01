@@ -1,29 +1,36 @@
 use bevy::prelude::*;
-use bevy_kira_audio::prelude::*;
 
-use crate::main_menu::{components::*, resources::*, styles::*};
+use crate::main_menu::{components::*, styles::*};
 
 pub fn spawn_main_menu(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    background: Res<AudioChannel<Background>>,
 ) {
     let _main_menu_entity = build_main_menu(&mut commands, &asset_server);
 
-    background
-        .play(asset_server.load("sounds/music/menu.ogg"))
-        .looped();
-
     commands.spawn((Camera2dBundle::default(), MainMenuCamera));
+    commands.spawn((
+        AudioBundle {
+            source: asset_server.load("sounds/music/menu.wav"),
+            settings: PlaybackSettings::LOOP,
+        },
+        MainMenuMusic,
+    ));
 }
 
 pub fn despawn_main_menu(
     mut commands: Commands,
-    main_menu_query: Query<Entity, (With<MainMenu>, Without<MainMenuCamera>)>,
-    main_menu_camera_query: Query<Entity, (With<MainMenuCamera>, Without<MainMenu>)>,
-    background: Res<AudioChannel<Background>>,
+    main_menu_query: Query<Entity, (With<MainMenu>, Without<MainMenuCamera>, Without<MainMenuMusic>)>,
+    main_menu_camera_query: Query<Entity, (With<MainMenuCamera>, Without<MainMenu>, Without<MainMenuMusic>)>,
+    // music_controller: Query<&AudioSink, With<MainMenuMusic>>,
+    music_controller: Query<Entity, With<MainMenuMusic>>,
 ) {
-    background.stop();
+    // if let Ok(sink) = music_controller.get_single() {
+    //     sink.stop();
+    // }
+    if let Ok(music) = music_controller.get_single() {
+        commands.entity(music).despawn_recursive();
+    }
 
     if let Ok(main_menu_entity) = main_menu_query.get_single() {
         commands.entity(main_menu_entity).despawn_recursive();

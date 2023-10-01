@@ -4,11 +4,9 @@ mod main_menu;
 use bevy::prelude::*;
 use bevy_b3d::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_kira_audio::prelude::*;
 use bevy_rmesh::*;
 // use bevy_xfile::*;
-use bevy_rapier3d::prelude::*;
-use bevy_scene_hook::HookPlugin;
+use bevy_xpbd_3d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use game::{player::PlayerAction, GamePlugin};
@@ -29,14 +27,13 @@ fn main() {
         // SCPCB Redux Plugins
         .add_plugins((MainMenuPlugin, GamePlugin))
         // File Formats
-        .add_plugins((B3DPlugin, /* XFilePlugin, */ RMeshPlugin))
+        .add_plugins((B3DPlugin, /*XFilePlugin,*/ RMeshPlugin))
         // Other Plugins
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
-        // .add_plugins(RapierDebugRenderPlugin::default())
-        .add_plugins(InputManagerPlugin::<PlayerAction>::default())
-        .add_plugins(WorldInspectorPlugin::default())
-        .add_plugins(HookPlugin)
-        .add_plugins(AudioPlugin)
+        .add_plugins((
+            PhysicsPlugins::default(),
+            InputManagerPlugin::<PlayerAction>::default(),
+            WorldInspectorPlugin::default(),
+        ))
         .run();
 }
 
@@ -45,4 +42,5 @@ pub enum AppState {
     #[default]
     MainMenu,
     Game,
+    // TODO: Loading and Preloading
 }

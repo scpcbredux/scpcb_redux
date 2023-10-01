@@ -21,5 +21,7 @@ pub struct PlayerInput {
     pub movement: Vec3,
     pub pitch: f32,
     pub yaw: f32,
+    pub blinking: bool,
     pub sprinting: bool,
+    pub crouched: bool,
 }

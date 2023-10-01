@@ -1,13 +1,7 @@
-use bevy::{
-    ecs::{system::EntityCommands, world::EntityRef},
-    prelude::*,
-    window::CursorGrabMode,
-};
-use bevy_rapier3d::prelude::*;
+use super::{components::*, player::*, scps::scp_106::components::Scp106, SimulationState};
+use bevy::{prelude::*, scene::SceneInstance, window::CursorGrabMode};
 use bevy_rmesh::rmesh::ROOM_SCALE;
-use bevy_scene_hook::{HookedSceneBundle, SceneHook};
-
-use super::{components::Map, player::*, scps::scp_106::components::Scp106, SimulationState};
+use bevy_xpbd_3d::prelude::*;
 
 pub fn pause_simulation(mut simulation_state_next_state: ResMut<NextState<SimulationState>>) {
     simulation_state_next_state.set(SimulationState::Paused);
@@ -22,6 +16,7 @@ pub fn toggle_simulation(
     simulation_state: Res<State<SimulationState>>,
     mut next_simulation_state: ResMut<NextState<SimulationState>>,
     mut windows: Query<&mut Window>,
+    mut time: ResMut<Time>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         let mut window = windows.single_mut();
@@ -31,17 +26,20 @@ pub fn toggle_simulation(
             window.cursor.grab_mode = CursorGrabMode::None;
 
             next_simulation_state.set(SimulationState::Paused);
+            time.pause();
         } else if simulation_state.eq(&SimulationState::Paused) {
             window.cursor.visible = false;
             window.cursor.grab_mode = CursorGrabMode::Locked;
 
             next_simulation_state.set(SimulationState::Running);
+            time.unpause();
         }
     }
 }
 
 pub fn spawn_map(
     mut commands: Commands,
+    // mut meshes: ResMut<Assets<Mesh>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut windows: Query<&mut Window>,
@@ -53,9 +51,10 @@ pub fn spawn_map(
     // SCP-106
     commands
         .spawn((
-            Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.0, 0.3),
-            RigidBody::Fixed,
+            Collider::capsule(0.5, 0.3),
+            RigidBody::Kinematic,
             TransformBundle::default(),
+            Position(Vec3::Y * 0.55),
             Visibility::default(),
             ComputedVisibility::default(),
             Scp106::default(),
@@ -69,31 +68,24 @@ pub fn spawn_map(
                     normal_map_texture: Some(asset_server.load("npcs/106_normals.png")),
                     ..Default::default()
                 }),
-                transform: Transform::from_scale(Vec3::ONE * (0.25 / 2.2)),
+                transform: Transform::from_scale(Vec3::ONE * (0.25 / 2.2))
+                    .with_translation(-Vec3::Y * 0.55),
                 ..Default::default()
             });
         });
 
     // Player
     commands.spawn((
-        Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.0, 0.3),
-        Friction {
-            coefficient: 0.0,
-            combine_rule: CoefficientCombineRule::Min,
-        },
-        Restitution {
-            coefficient: 0.0,
-            combine_rule: CoefficientCombineRule::Min,
-        },
-        ActiveEvents::COLLISION_EVENTS,
+        Collider::capsule(0.5, 0.3),
+        Friction::new(0.0).with_combine_rule(CoefficientCombine::Min),
+        Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
         RigidBody::Dynamic,
-        Sleeping::disabled(),
         LockedAxes::ROTATION_LOCKED,
-        AdditionalMassProperties::Mass(1.0),
         GravityScale(0.0),
-        Ccd { enabled: true },
-        TransformBundle::from(Transform::from_translation((1.8, 0., 1.5).into())),
+        Position(Vec3::new(1.8, 0.55, 1.5)),
+        TransformBundle::default(),
         PlayerBundle::default(),
+        PlayerFootsteps::new(&asset_server),
         Map,
     ));
 
@@ -114,13 +106,12 @@ pub fn spawn_map(
 
     // 173 Start Room
     commands.spawn((
-        HookedSceneBundle {
-            scene: SceneBundle {
-                scene: asset_server.load("map/173_opt.rmesh#Scene"),
-                ..default()
-            },
-            hook: SceneHook::new(scene_collider_hook),
+        SceneBundle {
+            scene: asset_server.load("map/173_opt.rmesh#Scene"),
+            ..default()
         },
+        Name::new("StartRoom"),
+        AsyncSceneCollider::default(),
         Map,
     ));
 }
@@ -131,8 +122,35 @@ pub fn despawn_map(mut commands: Commands, query: Query<Entity, With<Map>>) {
     }
 }
 
-fn scene_collider_hook(_entity: &EntityRef, _cmds: &mut EntityCommands) {
-    // if entity.contains::<Handle<Mesh>>() {
-    //     cmds.insert(AsyncCollider::default());
-    // }
+pub fn init_async_scene_colliders(
+    mut commands: Commands,
+    meshes: Res<Assets<Mesh>>,
+    scene_spawner: Res<SceneSpawner>,
+    async_colliders: Query<(Entity, &SceneInstance), With<AsyncSceneCollider>>,
+    children: Query<&Children>,
+    mesh_handles: Query<(&Name, &Handle<Mesh>)>,
+) {
+    for (scene_entity, scene_instance) in async_colliders.iter() {
+        if scene_spawner.instance_is_ready(**scene_instance) {
+            for child_entity in children.iter_descendants(scene_entity) {
+                if let Ok((name, handle)) = mesh_handles.get(child_entity) {
+                    let mesh = meshes.get(handle).expect("mesh should already be loaded");
+                    match Collider::trimesh_from_bevy_mesh(mesh) {
+                        Some(collider) => {
+                            // println!("{}", name);
+                            commands
+                                .entity(child_entity)
+                                .insert((collider, RigidBody::Static));
+                        }
+                        None => error!(
+                            "unable to generate collider from mesh {:?} with name {}",
+                            mesh, name
+                        ),
+                    }
+                }
+            }
+
+            commands.entity(scene_entity).remove::<AsyncSceneCollider>();
+        }
+    }
 }

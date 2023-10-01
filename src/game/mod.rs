@@ -25,7 +25,7 @@ impl Plugin for GamePlugin {
             // OnEnter State Systems
             .add_systems(OnEnter(AppState::Game), (pause_simulation, spawn_map))
             // Systems
-            .add_systems(Update, toggle_simulation.run_if(in_state(AppState::Game)))
+            .add_systems(Update, (init_async_scene_colliders, toggle_simulation).run_if(in_state(AppState::Game)))
             // OnExit System
             .add_systems(OnExit(AppState::Game), (resume_simulation, despawn_map));
     }

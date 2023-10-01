@@ -1,9 +1,8 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
-use bevy_kira_audio::prelude::*;
-use bevy_rapier3d::prelude::*;
+use bevy_xpbd_3d::prelude::*;
 use leafwing_input_manager::prelude::*;
 use rand::seq::SliceRandom;
-use std::f32::consts::*;
+use std::{f32::consts::*, time::Duration};
 
 use crate::game::player::{components::*, resources::*, ANGLE_EPSILON};
 
@@ -41,49 +40,46 @@ pub fn player_input(
         )
         .normalize_or_zero();
 
+        input.blinking = action_state.pressed(PlayerAction::Blink);
         input.sprinting = action_state.pressed(PlayerAction::Sprint);
+        input.crouched = action_state.pressed(PlayerAction::Crouch);
     }
 }
 
-pub fn player_look(
-    mut q_player: Query<(&Transform, &Player), Without<PlayerCamera>>,
-    mut q_camera: Query<&mut Transform, (Without<Player>, With<PlayerCamera>)>,
-    input: Res<PlayerInput>,
-) {
-    for (p_transform, player) in &mut q_player {
-        if let Ok(mut c_transform) = q_camera.get_single_mut() {
-            c_transform.translation = p_transform.translation + Vec3::Y * player.height;
-            c_transform.rotation = Quat::from_euler(EulerRot::YXZ, input.yaw, input.pitch, 0.0);
-        }
-    }
-}
-
-pub fn player_move(mut query: Query<(&mut Player, &mut Velocity)>, input: Res<PlayerInput>) {
-    for (mut player, mut velocity) in &mut query {
+pub fn player_move(mut query: Query<(&mut Player, &mut LinearVelocity)>, input: Res<PlayerInput>) {
+    for (mut player, mut linear_velocity) in &mut query {
         let mut move_to_world = Mat3::from_axis_angle(Vec3::Y, input.yaw);
         move_to_world.z_axis *= -1.0;
 
-        player.speed = if input.sprinting {
+        player.speed = if input.crouched {
+            player.crouch_speed
+        } else if input.sprinting {
             player.run_speed
         } else {
             player.walk_speed
         };
-        velocity.linvel = move_to_world * (input.movement * player.speed);
+        linear_velocity.0 = move_to_world * (input.movement * player.speed);
     }
 }
 
-pub fn player_bob(
+pub fn player_look(
     time: Res<Time>,
-    mut camera_query: Query<(&mut PlayerCamera, &mut Transform), Without<Player>>,
-    player_query: Query<(&Velocity, &Player), Without<PlayerCamera>>,
+    q_player: Query<(&Transform, &LinearVelocity, &Player), Without<PlayerCamera>>,
+    mut q_camera: Query<(&mut PlayerCamera, &mut Transform), Without<Player>>,
+    input: Res<PlayerInput>,
 ) {
     let dt = time.delta_seconds();
 
-    for (player_velocity, player) in &player_query {
-        for (mut camera, mut transform) in &mut camera_query {
-            camera.timer += dt * player_velocity.linvel.length() / player.speed;
+    for (p_transform, linear_velocity, player) in &q_player {
+        for (mut camera, mut c_transform) in &mut q_camera {
+            camera.timer += dt * linear_velocity.length() / player.speed;
 
-            let off = Vec3::new(
+            let c_height_off = if input.crouched {
+                player.co_crouched
+            } else {
+                player.co_default
+            };
+            let c_off = Vec3::new(
                 (camera.timer * camera.speed / 2.0).cos(),
                 -(camera.timer * camera.speed).sin(),
                 0.0,
@@ -91,37 +87,66 @@ pub fn player_bob(
 
             let rot = -(camera.timer * camera.speed / 2.0).cos() * camera.tilt;
 
-            transform.rotate_z(rot);
-            transform.translation += off * camera.max_bob;
+            c_transform.translation =
+                p_transform.translation + c_height_off + c_off * camera.max_bob;
+            c_transform.rotation = Quat::from_euler(EulerRot::YXZ, input.yaw, input.pitch, 0.0)
+                * Quat::from_rotation_z(rot);
         }
     }
 }
 
 pub fn player_footsteps(
     time: Res<Time>,
-    asset_server: Res<AssetServer>,
-    mut query: Query<(&Player, &Velocity, &mut PlayerFootsteps)>,
-    audio: Res<Audio>,
+    mut commands: Commands,
+    mut player_q: Query<(
+        Entity,
+        &Player,
+        &LinearVelocity,
+        &mut PlayerFootsteps,
+        &Transform,
+    )>,
     input: Res<PlayerInput>,
 ) {
     let dt = time.delta_seconds();
 
-    for (player, velocity, mut footsteps) in &mut query {
+    // Space between the two ears
+    let gap = 4.0;
+
+    for (entity, player, linear_velocity, mut footsteps, transform) in &mut player_q {
         let mut rng = rand::thread_rng();
 
-        footsteps.timer += dt * velocity.linvel.length() / player.speed;
+        footsteps.timer.tick(Duration::from_secs_f32(
+            dt * linear_velocity.length() / player.speed,
+        ));
 
-        if footsteps.timer > footsteps.delay {
+        if footsteps.timer.finished() {
             let rand_step = if input.sprinting {
                 footsteps.run_footsteps.choose(&mut rng)
             } else {
                 footsteps.walk_footsteps.choose(&mut rng)
             };
 
-            if let Some(rand_step) = rand_step {
-                audio.play(asset_server.load(rand_step));
+            if let Some(source) = rand_step {
+                commands.entity(entity).insert(SpatialAudioBundle {
+                    source: source.clone(),
+                    settings: PlaybackSettings::REMOVE,
+                    spatial: SpatialSettings::new(*transform, gap, transform.translation),
+                });
             }
-            footsteps.timer = 0.0;
+        }
+    }
+}
+
+pub fn player_blink(
+    time: Res<Time>,
+    mut query: Query<&mut PlayerBlinkTimer>,
+    input: Res<PlayerInput>,
+) {
+    if let Ok(mut blink_timer) = query.get_single_mut() {
+        blink_timer.tick(time.delta() + Duration::from_secs_f32(0.09));
+
+        if input.blinking {
+            blink_timer.reset();
         }
     }
 }

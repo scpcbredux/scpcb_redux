@@ -6,6 +6,9 @@ pub struct MainMenu;
 #[derive(Component)]
 pub struct MainMenuCamera;
 
+#[derive(Component)]
+pub struct MainMenuMusic;
+
 // === Buttons ===
 #[derive(Component)]
 pub struct NewGameButton;

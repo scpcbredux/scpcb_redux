@@ -1,15 +1,15 @@
 (
     room_ambiences: [
-        "audio/music/ambience/room/rumble.ogg",
-        "audio/music/ambience/room/lowdrone.ogg",
-        "audio/music/ambience/room/pulsing.ogg",
-        "audio/music/ambience/room/ventilation.ogg",
-        "audio/music/ambience/room/drip.ogg",
-        "audio/music/ambience/room/895.ogg",
-        "audio/music/ambience/room/fuel_pump.ogg",
-        "audio/music/ambience/room/fan.ogg",
-        "audio/music/ambience/room/servers1.ogg",
-        "audio/sfx/alarm/alarm.ogg",
+        "audio/music/ambience/room/rumble.wav",
+        "audio/music/ambience/room/lowdrone.wav",
+        "audio/music/ambience/room/pulsing.wav",
+        "audio/music/ambience/room/ventilation.wav",
+        "audio/music/ambience/room/drip.wav",
+        "audio/music/ambience/room/895.wav",
+        "audio/music/ambience/room/fuel_pump.wav",
+        "audio/music/ambience/room/fan.wav",
+        "audio/music/ambience/room/servers1.wav",
+        "audio/sfx/alarm/alarm.wav",
     ],
     rooms: {
         // Light Containment Zone

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -5,7 +7,11 @@ pub struct Player {
     pub speed: f32,
     pub walk_speed: f32,
     pub run_speed: f32,
-    pub height: f32,
+    pub crouch_speed: f32,
+    /// Camera offset default
+    pub co_default: Vec3,
+    /// Camera offset crouched
+    pub co_crouched: Vec3,
     pub crouch_state: f32,
     pub mouse_sensitivity: f32,
 }
@@ -16,46 +22,55 @@ impl Default for Player {
             speed: 2.5,
             walk_speed: 2.5,
             run_speed: 4.5,
-            height: 1.0,
+            crouch_speed: 1.0,
+            co_default: Vec3::Y * 0.5,
+            co_crouched: Vec3::Y * 0.2,
             crouch_state: 0.0,
             mouse_sensitivity: 0.003,
         }
     }
 }
 
-#[derive(Component)]
-pub struct PlayerFootsteps {
-    pub walk_footsteps: Vec<String>,
-    pub run_footsteps: Vec<String>,
-    pub timer: f32,
-    pub delay: f32,
+#[derive(Component, Deref, DerefMut)]
+pub struct PlayerBlinkTimer(pub Timer);
+
+impl Default for PlayerBlinkTimer {
+    fn default() -> Self {
+        Self(Timer::from_seconds(100.0, TimerMode::Repeating))
+    }
 }
 
-impl Default for PlayerFootsteps {
-    fn default() -> Self {
+#[derive(Component)]
+pub struct PlayerFootsteps {
+    pub walk_footsteps: Vec<Handle<AudioSource>>,
+    pub run_footsteps: Vec<Handle<AudioSource>>,
+    pub timer: Timer,
+}
+
+impl PlayerFootsteps {
+    pub fn new(asset_server: &Res<AssetServer>) -> Self {
         Self {
             walk_footsteps: vec![
-                "sounds/sfx/footsteps/step01.ogg".to_string(),
-                "sounds/sfx/footsteps/step02.ogg".to_string(),
-                "sounds/sfx/footsteps/step03.ogg".to_string(),
-                "sounds/sfx/footsteps/step04.ogg".to_string(),
-                "sounds/sfx/footsteps/step05.ogg".to_string(),
-                "sounds/sfx/footsteps/step06.ogg".to_string(),
-                "sounds/sfx/footsteps/step07.ogg".to_string(),
-                "sounds/sfx/footsteps/step08.ogg".to_string(),
+                asset_server.load("sounds/sfx/footsteps/step01.wav"),
+                asset_server.load("sounds/sfx/footsteps/step02.wav"),
+                asset_server.load("sounds/sfx/footsteps/step03.wav"),
+                asset_server.load("sounds/sfx/footsteps/step04.wav"),
+                asset_server.load("sounds/sfx/footsteps/step05.wav"),
+                asset_server.load("sounds/sfx/footsteps/step06.wav"),
+                asset_server.load("sounds/sfx/footsteps/step07.wav"),
+                asset_server.load("sounds/sfx/footsteps/step08.wav"),
             ],
             run_footsteps: vec![
-                "sounds/sfx/footsteps/run01.ogg".to_string(),
-                "sounds/sfx/footsteps/run02.ogg".to_string(),
-                "sounds/sfx/footsteps/run03.ogg".to_string(),
-                "sounds/sfx/footsteps/run04.ogg".to_string(),
-                "sounds/sfx/footsteps/run05.ogg".to_string(),
-                "sounds/sfx/footsteps/run06.ogg".to_string(),
-                "sounds/sfx/footsteps/run07.ogg".to_string(),
-                "sounds/sfx/footsteps/run08.ogg".to_string(),
+                asset_server.load("sounds/sfx/footsteps/run01.wav"),
+                asset_server.load("sounds/sfx/footsteps/run02.wav"),
+                asset_server.load("sounds/sfx/footsteps/run03.wav"),
+                asset_server.load("sounds/sfx/footsteps/run04.wav"),
+                asset_server.load("sounds/sfx/footsteps/run05.wav"),
+                asset_server.load("sounds/sfx/footsteps/run06.wav"),
+                asset_server.load("sounds/sfx/footsteps/run07.wav"),
+                asset_server.load("sounds/sfx/footsteps/run08.wav"),
             ],
-            timer: 0.0,
-            delay: 0.7,
+            timer: Timer::new(Duration::from_secs_f32(0.3), TimerMode::Repeating),
         }
     }
 }

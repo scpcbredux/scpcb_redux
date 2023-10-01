@@ -1,13 +1,11 @@
 mod components;
-mod resources;
 mod styles;
 mod systems;
 
-use resources::*;
 use systems::layout::*;
 
 use bevy::prelude::*;
-use bevy_kira_audio::prelude::*;
+// use bevy_kira_audio::prelude::*;
 
 use crate::AppState;
 
@@ -18,8 +16,6 @@ pub struct MainMenuPlugin;
 impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
         app
-            // Audio Channel
-            .add_audio_channel::<Background>()
             // OnEnter State Systems
             .add_systems(OnEnter(AppState::MainMenu), spawn_main_menu)
             // OnExit State Systems

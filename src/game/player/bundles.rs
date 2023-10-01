@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use super::{components::*, resources::*};
@@ -7,16 +6,17 @@ use super::{components::*, resources::*};
 #[derive(Bundle)]
 pub struct PlayerBundle {
     pub player: Player,
-    pub footsteps: PlayerFootsteps,
+    pub blink_timer: PlayerBlinkTimer,
+    // pub footsteps: PlayerFootsteps,
     pub input_bundle: InputManagerBundle<PlayerAction>,
-    pub velocity: Velocity,
 }
 
 impl Default for PlayerBundle {
     fn default() -> Self {
         Self {
             player: Default::default(),
-            footsteps: Default::default(),
+            blink_timer: Default::default(),
+            // footsteps: Default::default(),
             input_bundle: InputManagerBundle::<PlayerAction> {
                 action_state: ActionState::default(),
                 input_map: InputMap::new([
@@ -31,7 +31,6 @@ impl Default for PlayerBundle {
                     (KeyCode::F3, PlayerAction::Console),
                 ]),
             },
-            velocity: Default::default(),
         }
     }
 }
