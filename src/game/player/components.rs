@@ -18,9 +18,10 @@ pub struct Player {
 
 impl Default for Player {
     fn default() -> Self {
+        let walk_speed = 2.5;
         Self {
-            speed: 2.5,
-            walk_speed: 2.5,
+            speed: walk_speed,
+            walk_speed,
             run_speed: 4.5,
             crouch_speed: 1.0,
             co_default: Vec3::Y * 0.5,
