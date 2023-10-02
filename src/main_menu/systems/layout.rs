@@ -2,42 +2,26 @@ use bevy::prelude::*;
 
 use crate::main_menu::{components::*, styles::*};
 
-pub fn spawn_main_menu(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
+pub fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     let _main_menu_entity = build_main_menu(&mut commands, &asset_server);
 
-    commands.spawn((Camera2dBundle::default(), MainMenuCamera));
+    commands.spawn((Camera2dBundle::default(), MainMenuCamera, MainMenuScreen));
     commands.spawn((
         AudioBundle {
             source: asset_server.load("sounds/music/menu.wav"),
             settings: PlaybackSettings::LOOP,
         },
         MainMenuMusic,
+        MainMenuScreen,
     ));
 }
 
 pub fn despawn_main_menu(
     mut commands: Commands,
-    main_menu_query: Query<Entity, (With<MainMenu>, Without<MainMenuCamera>, Without<MainMenuMusic>)>,
-    main_menu_camera_query: Query<Entity, (With<MainMenuCamera>, Without<MainMenu>, Without<MainMenuMusic>)>,
-    // music_controller: Query<&AudioSink, With<MainMenuMusic>>,
-    music_controller: Query<Entity, With<MainMenuMusic>>,
+    main_menu_query: Query<Entity, With<MainMenuScreen>>,
 ) {
-    // if let Ok(sink) = music_controller.get_single() {
-    //     sink.stop();
-    // }
-    if let Ok(music) = music_controller.get_single() {
-        commands.entity(music).despawn_recursive();
-    }
-
-    if let Ok(main_menu_entity) = main_menu_query.get_single() {
-        commands.entity(main_menu_entity).despawn_recursive();
-    }
-
-    if let Ok(main_menu_entity) = main_menu_camera_query.get_single() {
-        commands.entity(main_menu_entity).despawn_recursive();
+    for entity in &main_menu_query {
+        commands.entity(entity).despawn_recursive();
     }
 }
 
@@ -50,6 +34,7 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
                 ..default()
             },
             MainMenu,
+            MainMenuScreen,
         ))
         .with_children(|parent| {
             parent.spawn(ImageBundle {

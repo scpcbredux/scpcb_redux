@@ -111,7 +111,7 @@ pub fn spawn_map(
             ..default()
         },
         Name::new("StartRoom"),
-        AsyncSceneCollider::default(),
+        AsyncSceneCollider,
         Map,
     ));
 }

@@ -3,5 +3,5 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct Map;
 
-#[derive(Component, Debug, Default, Clone)]
+#[derive(Component, Debug, Clone)]
 pub struct AsyncSceneCollider;
