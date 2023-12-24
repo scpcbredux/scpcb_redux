@@ -1,5 +1,5 @@
 use super::{components::*, player::*, scps::scp_106::components::Scp106, SimulationState};
-use bevy::{prelude::*, scene::SceneInstance, window::CursorGrabMode};
+use bevy::{prelude::*, window::CursorGrabMode};
 use bevy_rmesh::rmesh::ROOM_SCALE;
 use bevy_xpbd_3d::prelude::*;
 
@@ -16,7 +16,7 @@ pub fn toggle_simulation(
     simulation_state: Res<State<SimulationState>>,
     mut next_simulation_state: ResMut<NextState<SimulationState>>,
     mut windows: Query<&mut Window>,
-    mut time: ResMut<Time>,
+    // mut time: ResMut<Time>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         let mut window = windows.single_mut();
@@ -26,13 +26,13 @@ pub fn toggle_simulation(
             window.cursor.grab_mode = CursorGrabMode::None;
 
             next_simulation_state.set(SimulationState::Paused);
-            time.pause();
+            // time.pause();
         } else if simulation_state.eq(&SimulationState::Paused) {
             window.cursor.visible = false;
             window.cursor.grab_mode = CursorGrabMode::Locked;
 
             next_simulation_state.set(SimulationState::Running);
-            time.unpause();
+            // time.unpause();
         }
     }
 }
@@ -56,7 +56,8 @@ pub fn spawn_map(
             TransformBundle::default(),
             Position(Vec3::Y * 0.55),
             Visibility::default(),
-            ComputedVisibility::default(),
+            InheritedVisibility::default(),
+            ViewVisibility::default(),
             Scp106::default(),
             Map,
         ))
@@ -111,7 +112,7 @@ pub fn spawn_map(
             ..default()
         },
         Name::new("StartRoom"),
-        AsyncSceneCollider,
+        AsyncCollider(ComputedCollider::TriMesh),
         Map,
     ));
 }
@@ -119,38 +120,5 @@ pub fn spawn_map(
 pub fn despawn_map(mut commands: Commands, query: Query<Entity, With<Map>>) {
     for map in &query {
         commands.entity(map).despawn_recursive();
-    }
-}
-
-pub fn init_async_scene_colliders(
-    mut commands: Commands,
-    meshes: Res<Assets<Mesh>>,
-    scene_spawner: Res<SceneSpawner>,
-    async_colliders: Query<(Entity, &SceneInstance), With<AsyncSceneCollider>>,
-    children: Query<&Children>,
-    mesh_handles: Query<(&Name, &Handle<Mesh>)>,
-) {
-    for (scene_entity, scene_instance) in async_colliders.iter() {
-        if scene_spawner.instance_is_ready(**scene_instance) {
-            for child_entity in children.iter_descendants(scene_entity) {
-                if let Ok((name, handle)) = mesh_handles.get(child_entity) {
-                    let mesh = meshes.get(handle).expect("mesh should already be loaded");
-                    match Collider::trimesh_from_bevy_mesh(mesh) {
-                        Some(collider) => {
-                            // println!("{}", name);
-                            commands
-                                .entity(child_entity)
-                                .insert((collider, RigidBody::Static));
-                        }
-                        None => error!(
-                            "unable to generate collider from mesh {:?} with name {}",
-                            mesh, name
-                        ),
-                    }
-                }
-            }
-
-            commands.entity(scene_entity).remove::<AsyncSceneCollider>();
-        }
     }
 }

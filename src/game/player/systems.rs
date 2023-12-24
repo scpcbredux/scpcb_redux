@@ -16,7 +16,7 @@ pub fn player_input(
         let window = windows.single();
         if window.focused {
             let mut delta = Vec2::ZERO;
-            for ev in motion_evr.iter() {
+            for ev in motion_evr.read() {
                 delta += ev.delta;
             }
             delta *= player.mouse_sensitivity;
@@ -110,9 +110,9 @@ pub fn player_footsteps(
     let dt = time.delta_seconds();
 
     // Space between the two ears
-    let gap = 4.0;
+    // let gap = 4.0;
 
-    for (entity, player, linear_velocity, mut footsteps, transform) in &mut player_q {
+    for (entity, player, linear_velocity, mut footsteps, _transform) in &mut player_q {
         let mut rng = rand::thread_rng();
 
         footsteps.timer.tick(Duration::from_secs_f32(
@@ -127,10 +127,10 @@ pub fn player_footsteps(
             };
 
             if let Some(source) = rand_step {
-                commands.entity(entity).insert(SpatialAudioBundle {
+                commands.entity(entity).insert(AudioBundle {
                     source: source.clone(),
-                    settings: PlaybackSettings::REMOVE,
-                    spatial: SpatialSettings::new(*transform, gap, transform.translation),
+                    settings: PlaybackSettings::REMOVE.with_spatial(true),
+                    // spatial: SpatialSettings::new(*transform, gap, transform.translation),
                 });
             }
         }

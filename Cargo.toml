@@ -8,16 +8,16 @@ edition = "2021"
 # resolver = "2"
 
 [dependencies]
-bevy_b3d = "0.2.0"
-bevy_rmesh = "0.2.0"
+bevy_b3d = "0.3.0"
+bevy_rmesh = "0.3.0"
 # bevy_xfile = { path = "crates/bevy_xfile" }
-bevy_xpbd_3d = "0.2.0"
-bevy-inspector-egui = "0.19.0"
-leafwing-input-manager = "0.10.0"
+bevy_xpbd_3d = "0.3.2"
+bevy-inspector-egui = "0.21.0"
+leafwing-input-manager = "0.11.2"
 rand = "0.8.5"
 
 [dependencies.bevy]
-version = "0.11.3"
+version = "0.12.1"
 default-features = false
 
 features = [
