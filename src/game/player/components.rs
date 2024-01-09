@@ -18,11 +18,19 @@ pub struct Player {
 
 impl Default for Player {
     fn default() -> Self {
-        let walk_speed = 2.5;
+        // ROOM_SCALE is 0.00390625
+        // In scpcb the player moves 0.018
+        // In modern game engines units are by 100.0
+        // (0.00390625 + 0.018) * 100.0
+        // Making the walk_speed 2.19
+        // In addition, run_speed = speed * sprint
+        // sprint in scpcb is 2.5 making the run_speed 4.89
+        let walk_speed = 2.2;
+
         Self {
             speed: walk_speed,
             walk_speed,
-            run_speed: 4.5,
+            run_speed: 5.0,
             crouch_speed: 1.0,
             co_default: Vec3::Y * 0.5,
             co_crouched: Vec3::Y * 0.2,

@@ -101,7 +101,6 @@ pub fn player_footsteps(
     mut player_q: Query<(
         Entity,
         &Player,
-        &LinearVelocity,
         &mut PlayerFootsteps,
         &Transform,
     )>,
@@ -112,11 +111,11 @@ pub fn player_footsteps(
     // Space between the two ears
     // let gap = 4.0;
 
-    for (entity, player, linear_velocity, mut footsteps, _transform) in &mut player_q {
+    for (entity, player, mut footsteps, _transform) in &mut player_q {
         let mut rng = rand::thread_rng();
 
         footsteps.timer.tick(Duration::from_secs_f32(
-            dt * linear_velocity.length() / player.speed,
+            dt * player.speed,
         ));
 
         if footsteps.timer.finished() {
@@ -129,7 +128,7 @@ pub fn player_footsteps(
             if let Some(source) = rand_step {
                 commands.entity(entity).insert(AudioBundle {
                     source: source.clone(),
-                    settings: PlaybackSettings::REMOVE.with_spatial(true),
+                    settings: PlaybackSettings::REMOVE.with_spatial(/*true*/ false),
                     // spatial: SpatialSettings::new(*transform, gap, transform.translation),
                 });
             }

@@ -12,7 +12,7 @@ bevy_b3d = "0.3.0"
 bevy_rmesh = "0.3.0"
 # bevy_xfile = { path = "crates/bevy_xfile" }
 bevy_xpbd_3d = "0.3.2"
-bevy-inspector-egui = "0.21.0"
+bevy-inspector-egui = "0.22.0"
 leafwing-input-manager = "0.11.2"
 rand = "0.8.5"
 

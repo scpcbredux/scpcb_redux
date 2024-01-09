@@ -16,7 +16,7 @@ pub fn toggle_simulation(
     simulation_state: Res<State<SimulationState>>,
     mut next_simulation_state: ResMut<NextState<SimulationState>>,
     mut windows: Query<&mut Window>,
-    // mut time: ResMut<Time>,
+    mut time: ResMut<Time<Virtual>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         let mut window = windows.single_mut();
@@ -26,13 +26,13 @@ pub fn toggle_simulation(
             window.cursor.grab_mode = CursorGrabMode::None;
 
             next_simulation_state.set(SimulationState::Paused);
-            // time.pause();
+            time.pause();
         } else if simulation_state.eq(&SimulationState::Paused) {
             window.cursor.visible = false;
             window.cursor.grab_mode = CursorGrabMode::Locked;
 
             next_simulation_state.set(SimulationState::Running);
-            // time.unpause();
+            time.unpause();
         }
     }
 }
@@ -112,7 +112,7 @@ pub fn spawn_map(
             ..default()
         },
         Name::new("StartRoom"),
-        AsyncCollider(ComputedCollider::TriMesh),
+        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
         Map,
     ));
 }
