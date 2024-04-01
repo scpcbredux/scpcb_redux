@@ -1,11 +1,12 @@
 use bevy::prelude::*;
 
-use crate::main_menu::{components::*, styles::*};
+use crate::{main_menu::{components::*, styles::*}, StartupCamera};
 
 pub fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn((Camera2dBundle::default(), StartupCamera));
+
     let _main_menu_entity = build_main_menu(&mut commands, &asset_server);
 
-    commands.spawn((Camera2dBundle::default(), MainMenuCamera, MainMenuScreen));
     commands.spawn((
         AudioBundle {
             source: asset_server.load("sounds/music/menu.wav"),
@@ -18,9 +19,13 @@ pub fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 pub fn despawn_main_menu(
     mut commands: Commands,
-    main_menu_query: Query<Entity, With<MainMenuScreen>>,
+    main_menu_query: Query<Entity, (With<MainMenuScreen>, Without<StartupCamera>)>,
+    start_up_cam_query: Query<Entity, (Without<MainMenuScreen>, With<StartupCamera>)>,
 ) {
     for entity in &main_menu_query {
+        commands.entity(entity).despawn_recursive();
+    }
+    for entity in &start_up_cam_query {
         commands.entity(entity).despawn_recursive();
     }
 }
@@ -78,7 +83,7 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
                                         color: BUTTON_FONT_COLOR,
                                     },
                                 )
-                                .with_text_alignment(TextAlignment::Center),
+                                .with_text_justify(JustifyText::Center),
                             );
                         });
                     // === Load Game Button ===
@@ -106,7 +111,7 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
                                         color: BUTTON_FONT_COLOR,
                                     },
                                 )
-                                .with_text_alignment(TextAlignment::Center),
+                                .with_text_justify(JustifyText::Center),
                             );
                         });
                     // === Options Button ===
@@ -134,7 +139,7 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
                                         color: BUTTON_FONT_COLOR,
                                     },
                                 )
-                                .with_text_alignment(TextAlignment::Center),
+                                .with_text_justify(JustifyText::Center),
                             );
                         });
                     // === Quit Button ===
@@ -162,7 +167,7 @@ pub fn build_main_menu(commands: &mut Commands, asset_server: &Res<AssetServer>)
                                         color: BUTTON_FONT_COLOR,
                                     },
                                 )
-                                .with_text_alignment(TextAlignment::Center),
+                                .with_text_justify(JustifyText::Center),
                             );
                         });
                 });

@@ -1,16 +1,18 @@
 mod game;
 mod main_menu;
+// mod preload;
 
 use bevy::prelude::*;
 use bevy_b3d::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rmesh::*;
-// use bevy_xfile::*;
 use bevy_xpbd_3d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use game::{player::PlayerAction, GamePlugin};
 use main_menu::MainMenuPlugin;
+// use preload::PreloadPlugin;
+// use preload::video::AviPlugin;
 
 fn main() {
     App::new()
@@ -23,11 +25,11 @@ fn main() {
             }),
             ..default()
         }))
-        .add_state::<AppState>()
-        // SCPCB Redux Plugins
-        .add_plugins((MainMenuPlugin, GamePlugin))
+        .init_state::<AppState>()
         // File Formats
-        .add_plugins((B3DPlugin, /*XFilePlugin,*/ RMeshPlugin))
+        .add_plugins((B3DPlugin, /*XFilePlugin,*/ RMeshPlugin, /*AviPlugin*/))
+        // SCPCB Redux Plugins
+        .add_plugins((/*PreloadPlugin,*/ MainMenuPlugin, GamePlugin))
         // Other Plugins
         .add_plugins((
             PhysicsPlugins::default(),
@@ -40,7 +42,11 @@ fn main() {
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum AppState {
     #[default]
+    // Preload,
     MainMenu,
     Game,
-    // TODO: Loading and Preloading
+    // TODO: Loading
 }
+
+#[derive(Component)]
+pub struct StartupCamera;

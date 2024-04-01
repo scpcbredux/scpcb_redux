@@ -19,7 +19,7 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<SimulationState>()
+        app.init_state::<SimulationState>()
             // Plugins
             .add_plugins((PlayerPlugin, ScpPlugins, GameUiPlugin))
             // OnEnter State Systems

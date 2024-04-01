@@ -45,7 +45,8 @@ pub struct PlayerBlinkTimer(pub Timer);
 
 impl Default for PlayerBlinkTimer {
     fn default() -> Self {
-        Self(Timer::from_seconds(100.0, TimerMode::Repeating))
+        // Self(Timer::from_seconds(100.0, TimerMode::Repeating))
+        Self(Timer::from_seconds(10.0, TimerMode::Repeating))
     }
 }
 

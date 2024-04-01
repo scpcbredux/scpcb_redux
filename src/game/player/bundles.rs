@@ -20,16 +20,19 @@ impl Default for PlayerBundle {
             input_bundle: InputManagerBundle::<PlayerAction> {
                 action_state: ActionState::default(),
                 input_map: InputMap::new([
-                    (KeyCode::W, PlayerAction::MoveUp),
-                    (KeyCode::S, PlayerAction::MoveDown),
-                    (KeyCode::A, PlayerAction::MoveLeft),
-                    (KeyCode::D, PlayerAction::MoveRight),
-                    (KeyCode::Space, PlayerAction::Blink),
-                    (KeyCode::ShiftLeft, PlayerAction::Sprint),
-                    (KeyCode::Tab, PlayerAction::Inventory),
-                    (KeyCode::ControlLeft, PlayerAction::Crouch),
-                    (KeyCode::F3, PlayerAction::Console),
-                ]),
+                    (PlayerAction::MoveUp, KeyCode::KeyW),
+                    (PlayerAction::MoveDown, KeyCode::KeyS),
+                    (PlayerAction::MoveLeft, KeyCode::KeyA),
+                    (PlayerAction::MoveRight, KeyCode::KeyD),
+                    (PlayerAction::Blink, KeyCode::Space),
+                    (PlayerAction::Sprint, KeyCode::ShiftLeft),
+                    (PlayerAction::Inventory, KeyCode::Tab),
+                    (PlayerAction::Crouch, KeyCode::ControlLeft),
+                    (PlayerAction::Console, KeyCode::F3),
+                    (PlayerAction::Pause, KeyCode::Escape),
+                ])
+                .insert(PlayerAction::MouseMotion, DualAxis::mouse_motion())
+                .build(),
             },
         }
     }

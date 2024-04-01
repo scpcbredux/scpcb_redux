@@ -1,6 +1,5 @@
-use bevy::prelude::*;
-
 use crate::game::ui::pause_menu::{components::*, styles::*};
+use bevy::prelude::*;
 
 pub fn spawn_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     let _pause_menu_entity = build_pause_menu(&mut commands, &asset_server);
@@ -51,7 +50,7 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
                                 color: Color::WHITE,
                             },
                         )
-                        .with_text_alignment(TextAlignment::Center)
+                        .with_text_justify(JustifyText::Center)
                         .with_style(Style {
                             margin: UiRect {
                                 left: Val::Px(90.0),
@@ -93,7 +92,7 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
                                                 color: BUTTON_FONT_COLOR,
                                             },
                                         )
-                                        .with_text_alignment(TextAlignment::Center),
+                                        .with_text_justify(JustifyText::Center),
                                     );
                                 });
                             // === Load Game Button ===
@@ -121,7 +120,7 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
                                                 color: BUTTON_FONT_COLOR,
                                             },
                                         )
-                                        .with_text_alignment(TextAlignment::Center),
+                                        .with_text_justify(JustifyText::Center),
                                     );
                                 });
                             // === Achievements Button ===
@@ -149,7 +148,7 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
                                                 color: BUTTON_FONT_COLOR,
                                             },
                                         )
-                                        .with_text_alignment(TextAlignment::Center),
+                                        .with_text_justify(JustifyText::Center),
                                     );
                                 });
                             // === Options Button ===
@@ -177,7 +176,7 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
                                                 color: BUTTON_FONT_COLOR,
                                             },
                                         )
-                                        .with_text_alignment(TextAlignment::Center),
+                                        .with_text_justify(JustifyText::Center),
                                     );
                                 });
                             // === Quit Button ===
@@ -205,7 +204,7 @@ pub fn build_pause_menu(commands: &mut Commands, asset_server: &Res<AssetServer>
                                                 color: BUTTON_FONT_COLOR,
                                             },
                                         )
-                                        .with_text_alignment(TextAlignment::Center),
+                                        .with_text_justify(JustifyText::Center),
                                     );
                                 });
                         });

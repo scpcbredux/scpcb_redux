@@ -8,22 +8,26 @@ edition = "2021"
 # resolver = "2"
 
 [dependencies]
-bevy_b3d = "0.3.0"
-bevy_rmesh = "0.3.0"
+bevy_b3d = "0.3.2"
+bevy_rmesh = "0.3.1"
 # bevy_xfile = { path = "crates/bevy_xfile" }
-bevy_xpbd_3d = "0.3.2"
-bevy-inspector-egui = "0.22.0"
-leafwing-input-manager = "0.11.2"
+bevy_xpbd_3d = "0.4.2"
+bevy-inspector-egui = "0.23.4"
+leafwing-input-manager = "0.13.3"
 rand = "0.8.5"
+# avi = { version = "0.1.0", path = "../video/avi" }
+# image = "0.24.8"
+# anyhow = "1.0.79"
 
 [dependencies.bevy]
-version = "0.12.1"
+version = "0.13.1"
 default-features = false
 
 features = [
     "animation",
     "bevy_asset",
     "bevy_audio",
+    "bevy_gilrs",
     "bevy_scene",
     "bevy_winit",
     "bevy_core_pipeline",
@@ -32,14 +36,19 @@ features = [
     "bevy_sprite",
     "bevy_text",
     "bevy_ui",
+    "multi-threaded",
     "png",
     "jpeg",
     "hdr",
-    "ktx2",
-    "zstd",
+    "vorbis",
     "x11",
     "wayland",
+    "bevy_gizmos",
+    "android_shared_stdcxx",
     "tonemapping_luts",
+    "default_font",
+    "webgl2",
+    "bevy_debug_stepping",
     "wav",
 ]
 

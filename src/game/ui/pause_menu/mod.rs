@@ -2,13 +2,10 @@ mod components;
 mod styles;
 mod systems;
 
-use systems::layout::*;
-
-use bevy::prelude::*;
-
-use crate::game::SimulationState;
-
 use self::systems::interactions::*;
+use crate::game::SimulationState;
+use bevy::prelude::*;
+use systems::layout::*;
 
 pub struct PauseMenuPlugin;
 

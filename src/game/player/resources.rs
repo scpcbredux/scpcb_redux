@@ -3,6 +3,7 @@ use leafwing_input_manager::prelude::*;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum PlayerAction {
+    MouseMotion,
     MoveUp,
     MoveDown,
     MoveLeft,
@@ -13,6 +14,7 @@ pub enum PlayerAction {
     Crouch,
     Save,
     Console,
+    Pause,
 }
 
 // TODO: Remove this

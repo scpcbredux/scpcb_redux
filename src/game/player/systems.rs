@@ -1,48 +1,47 @@
-use bevy::{input::mouse::MouseMotion, prelude::*};
+use crate::game::player::{components::*, resources::*, ANGLE_EPSILON};
+use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::*;
 use leafwing_input_manager::prelude::*;
 use rand::seq::SliceRandom;
 use std::{f32::consts::*, time::Duration};
 
-use crate::game::player::{components::*, resources::*, ANGLE_EPSILON};
-
 pub fn player_input(
     query: Query<(&ActionState<PlayerAction>, &Player)>,
     windows: Query<&mut Window>,
-    mut motion_evr: EventReader<MouseMotion>,
     mut input: ResMut<PlayerInput>,
 ) {
     for (action_state, player) in &query {
         let window = windows.single();
         if window.focused {
-            let mut delta = Vec2::ZERO;
-            for ev in motion_evr.read() {
-                delta += ev.delta;
-            }
-            delta *= player.mouse_sensitivity;
+            if let Some(vector) = action_state.axis_pair(&PlayerAction::MouseMotion) {
+                let mut delta = Vec2::ZERO;
+                delta.x += vector.x();
+                delta.y += vector.y();
+                delta *= player.mouse_sensitivity;
 
-            input.pitch = (input.pitch - delta.y)
-                .clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
-            input.yaw -= delta.x;
-            if input.yaw.abs() > PI {
-                input.yaw = input.yaw.rem_euclid(TAU);
+                input.pitch = (input.pitch - delta.y)
+                    .clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
+                input.yaw -= delta.x;
+                if input.yaw.abs() > PI {
+                    input.yaw = input.yaw.rem_euclid(TAU);
+                }
             }
         }
 
         input.movement = Vec3::new(
             get_input_axis(
-                PlayerAction::MoveRight,
-                PlayerAction::MoveLeft,
+                &PlayerAction::MoveRight,
+                &PlayerAction::MoveLeft,
                 action_state,
             ),
             0.0,
-            get_input_axis(PlayerAction::MoveUp, PlayerAction::MoveDown, action_state),
+            get_input_axis(&PlayerAction::MoveUp, &PlayerAction::MoveDown, action_state),
         )
         .normalize_or_zero();
 
-        input.blinking = action_state.pressed(PlayerAction::Blink);
-        input.sprinting = action_state.pressed(PlayerAction::Sprint);
-        input.crouched = action_state.pressed(PlayerAction::Crouch);
+        input.blinking = action_state.pressed(&PlayerAction::Blink);
+        input.sprinting = action_state.pressed(&PlayerAction::Sprint);
+        input.crouched = action_state.pressed(&PlayerAction::Crouch);
     }
 }
 
@@ -98,12 +97,7 @@ pub fn player_look(
 pub fn player_footsteps(
     time: Res<Time>,
     mut commands: Commands,
-    mut player_q: Query<(
-        Entity,
-        &Player,
-        &mut PlayerFootsteps,
-        &Transform,
-    )>,
+    mut player_q: Query<(Entity, &LinearVelocity, &mut PlayerFootsteps, &Transform), With<Player>>,
     input: Res<PlayerInput>,
 ) {
     let dt = time.delta_seconds();
@@ -111,12 +105,12 @@ pub fn player_footsteps(
     // Space between the two ears
     // let gap = 4.0;
 
-    for (entity, player, mut footsteps, _transform) in &mut player_q {
+    for (entity, linear_velocity, mut footsteps, _transform) in &mut player_q {
         let mut rng = rand::thread_rng();
 
-        footsteps.timer.tick(Duration::from_secs_f32(
-            dt * player.speed,
-        ));
+        footsteps
+            .timer
+            .tick(Duration::from_secs_f32(dt * linear_velocity.length()));
 
         if footsteps.timer.finished() {
             let rand_step = if input.sprinting {
@@ -140,9 +134,10 @@ pub fn player_blink(
     time: Res<Time>,
     mut query: Query<&mut PlayerBlinkTimer>,
     input: Res<PlayerInput>,
+
 ) {
     if let Ok(mut blink_timer) = query.get_single_mut() {
-        blink_timer.tick(time.delta() + Duration::from_secs_f32(0.09));
+        blink_timer.tick(time.delta());
 
         if input.blinking {
             blink_timer.reset();
@@ -150,11 +145,11 @@ pub fn player_blink(
     }
 }
 
-fn get_input_axis<A: Actionlike>(paction: A, saction: A, action_state: &ActionState<A>) -> f32 {
+fn get_input_axis<A: Actionlike>(paction: &A, saction: &A, action_state: &ActionState<A>) -> f32 {
     get_input_value(paction, action_state) - get_input_value(saction, action_state)
 }
 
-fn get_input_value<A: Actionlike>(action: A, action_state: &ActionState<A>) -> f32 {
+fn get_input_value<A: Actionlike>(action: &A, action_state: &ActionState<A>) -> f32 {
     if action_state.pressed(action) {
         1.0
     } else {
