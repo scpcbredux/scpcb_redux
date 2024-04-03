@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{main_menu::{components::*, styles::*}, StartupCamera};
+use crate::{
+    main_menu::{components::*, styles::*},
+    StartupCamera,
+};
 
 pub fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((Camera2dBundle::default(), StartupCamera));

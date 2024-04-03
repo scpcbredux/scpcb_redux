@@ -1,6 +1,6 @@
-use crate::game::player::{PlayerBlinkTimer, PlayerStamina};
-
 use super::components::{BlinkMeter, Hud, SprintMeter};
+use super::pause_menu::build_pause_menu;
+use crate::game::player::{PlayerBlinkTimer, PlayerStamina};
 use bevy::prelude::*;
 
 const PROGRESS_BAR_WIDTH: f32 = 204.5;
@@ -19,7 +19,7 @@ pub fn build_hud(commands: &mut Commands, asset_server: &Res<AssetServer>) -> En
     let hud_entity = commands
         .spawn((
             NodeBundle {
-            // ImageBundle {
+                // ImageBundle {
                 style: Style {
                     width: Val::Percent(100.0),
                     height: Val::Percent(100.0),
@@ -31,6 +31,7 @@ pub fn build_hud(commands: &mut Commands, asset_server: &Res<AssetServer>) -> En
             Hud,
         ))
         .with_children(|parent| {
+            build_pause_menu(parent, asset_server);
             parent
                 .spawn(NodeBundle {
                     style: Style {
@@ -130,7 +131,9 @@ pub fn build_hud(commands: &mut Commands, asset_server: &Res<AssetServer>) -> En
                         })
                         .with_children(|parent| {
                             parent.spawn(ImageBundle {
-                                image: asset_server.load("ui/game/hud_icons/sprint_icon.png").into(),
+                                image: asset_server
+                                    .load("ui/game/hud_icons/sprint_icon.png")
+                                    .into(),
                                 style: Style {
                                     width: Val::Px(27.0),
                                     height: Val::Px(27.0),

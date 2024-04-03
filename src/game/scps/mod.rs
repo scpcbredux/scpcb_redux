@@ -6,6 +6,7 @@ use bevy::{app::PluginGroupBuilder, prelude::*};
 use scp_106::Scp106Plugin;
 use scp_173::Scp173Plugin;
 
+#[allow(unused_imports)]
 pub mod prelude {
     pub use super::scp_106::components::Scp106;
     pub use super::scp_173::components::Scp173;

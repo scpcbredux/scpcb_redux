@@ -27,7 +27,10 @@ fn main() {
         }))
         .init_state::<AppState>()
         // File Formats
-        .add_plugins((B3DPlugin, /*XFilePlugin,*/ RMeshPlugin, /*AviPlugin*/))
+        .add_plugins((
+            B3DPlugin,
+            /*XFilePlugin,*/ RMeshPlugin, /*AviPlugin*/
+        ))
         // SCPCB Redux Plugins
         .add_plugins((/*PreloadPlugin,*/ MainMenuPlugin, GamePlugin))
         // Other Plugins
