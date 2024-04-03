@@ -51,6 +51,23 @@ impl Default for PlayerBlinkTimer {
 }
 
 #[derive(Component)]
+pub struct PlayerStamina {
+    pub amount: f32,
+    pub effect: f32,
+    pub effect_timer: Timer,
+}
+
+impl Default for PlayerStamina {
+    fn default() -> Self {
+        Self {
+            amount: 100.0,
+            effect: Default::default(),
+            effect_timer: Default::default(),
+        }
+    }
+}
+
+#[derive(Component)]
 pub struct PlayerFootsteps {
     pub walk_footsteps: Vec<Handle<AudioSource>>,
     pub run_footsteps: Vec<Handle<AudioSource>>,

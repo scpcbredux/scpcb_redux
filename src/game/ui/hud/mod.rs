@@ -13,7 +13,7 @@ impl Plugin for HudPlugin {
             .add_systems(OnExit(AppState::Game), despawn_hud)
             .add_systems(
                 Update,
-                update_progress_bar
+                (update_blink_bar, update_sprint_bar)
                     .run_if(in_state(AppState::Game))
                     .run_if(in_state(SimulationState::Running)),
             );

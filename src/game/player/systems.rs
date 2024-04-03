@@ -6,11 +6,11 @@ use rand::seq::SliceRandom;
 use std::{f32::consts::*, time::Duration};
 
 pub fn player_input(
-    query: Query<(&ActionState<PlayerAction>, &Player)>,
+    query: Query<(&ActionState<PlayerAction>, &Player, &PlayerStamina)>,
     windows: Query<&mut Window>,
     mut input: ResMut<PlayerInput>,
 ) {
-    for (action_state, player) in &query {
+    for (action_state, player, player_stamina) in &query {
         let window = windows.single();
         if window.focused {
             if let Some(vector) = action_state.axis_pair(&PlayerAction::MouseMotion) {
@@ -40,7 +40,9 @@ pub fn player_input(
         .normalize_or_zero();
 
         input.blinking = action_state.pressed(&PlayerAction::Blink);
-        input.sprinting = action_state.pressed(&PlayerAction::Sprint);
+        if player_stamina.amount > 0.0 {
+            input.sprinting = action_state.pressed(&PlayerAction::Sprint);
+        }
         input.crouched = action_state.pressed(&PlayerAction::Crouch);
     }
 }
@@ -57,7 +59,10 @@ pub fn player_move(mut query: Query<(&mut Player, &mut LinearVelocity)>, input: 
         } else {
             player.walk_speed
         };
+        let y_component = linear_velocity.0.y;
+
         linear_velocity.0 = move_to_world * (input.movement * player.speed);
+        linear_velocity.y = y_component;
     }
 }
 
@@ -134,7 +139,6 @@ pub fn player_blink(
     time: Res<Time>,
     mut query: Query<&mut PlayerBlinkTimer>,
     input: Res<PlayerInput>,
-
 ) {
     if let Ok(mut blink_timer) = query.get_single_mut() {
         blink_timer.tick(time.delta());
@@ -142,6 +146,33 @@ pub fn player_blink(
         if input.blinking {
             blink_timer.reset();
         }
+    }
+}
+
+pub fn player_stamina(
+    time: Res<Time>,
+    mut query: Query<&mut PlayerStamina>,
+    input: Res<PlayerInput>,
+) {
+    let dt = time.delta_seconds();
+
+    if let Ok(mut stamina) = query.get_single_mut() {
+        if input.sprinting {
+            stamina.amount -= dt * 0.5 * (1.0 / stamina.effect);
+            if stamina.amount <= 0.0 {
+                stamina.amount = -20.0;
+            }
+        } else {
+            stamina.amount = (stamina.amount + 0.15 * dt).min(100.0);
+        }
+
+        if stamina.effect_timer.finished() {
+            stamina.effect -= dt / 70.0;
+        } else {
+            stamina.effect = 1.0;
+        }
+
+        // info!("Stamina: {:#?}", stamina.amount);
     }
 }
 

@@ -9,7 +9,8 @@ edition = "2021"
 
 [dependencies]
 bevy_b3d = "0.3.2"
-bevy_rmesh = "0.3.1"
+# bevy_b3d = { path = "/home/charlie/Documents/Projects/Rust/b3d/bevy_b3d/" }
+bevy_rmesh = "0.3.2"
 # bevy_xfile = { path = "crates/bevy_xfile" }
 bevy_xpbd_3d = "0.4.2"
 bevy-inspector-egui = "0.23.4"

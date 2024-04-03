@@ -7,6 +7,7 @@ use super::{components::*, resources::*};
 pub struct PlayerBundle {
     pub player: Player,
     pub blink_timer: PlayerBlinkTimer,
+    pub stamina: PlayerStamina,
     // pub footsteps: PlayerFootsteps,
     pub input_bundle: InputManagerBundle<PlayerAction>,
 }
@@ -16,6 +17,7 @@ impl Default for PlayerBundle {
         Self {
             player: Default::default(),
             blink_timer: Default::default(),
+            stamina: Default::default(),
             // footsteps: Default::default(),
             input_bundle: InputManagerBundle::<PlayerAction> {
                 action_state: ActionState::default(),
@@ -29,7 +31,6 @@ impl Default for PlayerBundle {
                     (PlayerAction::Inventory, KeyCode::Tab),
                     (PlayerAction::Crouch, KeyCode::ControlLeft),
                     (PlayerAction::Console, KeyCode::F3),
-                    (PlayerAction::Pause, KeyCode::Escape),
                 ])
                 .insert(PlayerAction::MouseMotion, DualAxis::mouse_motion())
                 .build(),

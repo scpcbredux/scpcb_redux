@@ -33,6 +33,7 @@ fn main() {
         // Other Plugins
         .add_plugins((
             PhysicsPlugins::default(),
+            // PhysicsDebugPlugin::default(),
             InputManagerPlugin::<PlayerAction>::default(),
             WorldInspectorPlugin::default(),
         ))

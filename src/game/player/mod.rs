@@ -25,6 +25,7 @@ impl Plugin for PlayerPlugin {
                 player_look,
                 player_move,
                 player_blink,
+                player_stamina,
                 player_footsteps,
             )
                 .run_if(in_state(SimulationState::Running)),

@@ -4,4 +4,7 @@ use bevy::prelude::*;
 pub struct Hud;
 
 #[derive(Component)]
-pub struct ProgressMeter(pub usize);
+pub struct BlinkMeter(pub usize);
+
+#[derive(Component)]
+pub struct SprintMeter(pub usize);

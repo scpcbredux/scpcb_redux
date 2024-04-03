@@ -14,7 +14,6 @@ pub enum PlayerAction {
     Crouch,
     Save,
     Console,
-    Pause,
 }
 
 // TODO: Remove this
