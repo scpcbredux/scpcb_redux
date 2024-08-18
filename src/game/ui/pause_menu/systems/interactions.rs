@@ -1,5 +1,5 @@
+use avian3d::prelude::*;
 use bevy::{prelude::*, window::CursorGrabMode};
-use bevy_xpbd_3d::prelude::*;
 
 use crate::{
     game::{ui::pause_menu::components::*, SimulationState},

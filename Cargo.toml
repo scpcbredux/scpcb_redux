@@ -3,29 +3,25 @@ name = "scpcb_redux"
 version = "0.1.0"
 edition = "2021"
 
-# [workspace]
-# members = ["crates/*"]
-# resolver = "2"
-
 [dependencies]
-bevy_b3d = "0.3.2"
-# bevy_b3d = { path = "/home/charlie/Documents/Projects/Rust/b3d/bevy_b3d/" }
-bevy_rmesh = "0.3.2"
-# bevy_xfile = { path = "crates/bevy_xfile" }
-bevy_xpbd_3d = "0.4.2"
-bevy-inspector-egui = "0.23.4"
-leafwing-input-manager = "0.13.3"
+bevy_b3d = "0.4.0"
+bevy_rmesh = "0.4.0"
+bevy_directx_mesh = "0.1.0"
+avian3d = "0.1.2"
+bevy-inspector-egui = "0.25.2"
+leafwing-input-manager = "0.15.0"
 rand = "0.8.5"
 # avi = { version = "0.1.0", path = "../video/avi" }
 # image = "0.24.8"
 # anyhow = "1.0.79"
 
 [dependencies.bevy]
-version = "0.13.1"
+version = "0.14.1"
 default-features = false
 
 features = [
     "animation",
+    "bevy_state",
     "bevy_asset",
     "bevy_audio",
     "bevy_gilrs",
@@ -37,7 +33,7 @@ features = [
     "bevy_sprite",
     "bevy_text",
     "bevy_ui",
-    "multi-threaded",
+    "multi_threaded",
     "png",
     "jpeg",
     "hdr",
@@ -51,6 +47,7 @@ features = [
     "webgl2",
     "bevy_debug_stepping",
     "wav",
+    "bevy_dev_tools"
 ]
 
 # Enable a small amount of optimization in debug mode

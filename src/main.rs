@@ -2,11 +2,12 @@ mod game;
 mod main_menu;
 // mod preload;
 
-use bevy::prelude::*;
+use avian3d::prelude::*;
+use bevy::{dev_tools::fps_overlay::*, prelude::*};
 use bevy_b3d::*;
+use bevy_directx_mesh::DirectXMeshPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_rmesh::*;
-use bevy_xpbd_3d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use game::{player::PlayerAction, GamePlugin};
@@ -27,14 +28,20 @@ fn main() {
         }))
         .init_state::<AppState>()
         // File Formats
-        .add_plugins((
-            B3DPlugin,
-            /*XFilePlugin,*/ RMeshPlugin, /*AviPlugin*/
-        ))
+        .add_plugins((DirectXMeshPlugin, B3DPlugin, RMeshPlugin))
         // SCPCB Redux Plugins
         .add_plugins((/*PreloadPlugin,*/ MainMenuPlugin, GamePlugin))
         // Other Plugins
         .add_plugins((
+            FpsOverlayPlugin {
+                config: FpsOverlayConfig {
+                    text_config: TextStyle {
+                        font_size: 20.0,
+                        color: Color::WHITE,
+                        font: default(),
+                    },
+                },
+            },
             PhysicsPlugins::default(),
             // PhysicsDebugPlugin::default(),
             InputManagerPlugin::<PlayerAction>::default(),

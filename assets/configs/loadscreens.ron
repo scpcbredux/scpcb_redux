@@ -4,7 +4,7 @@
             image_path: "ui/load_screens/mtf.jpg",
             descriptions: [
                 "MTFs are small teams (ten to twenty operatives usually, although groups with more than 50 operatives are not unheard of) that specialize in specific roles or respond to specific situations.",
-                "Mobile Task Force E-11 ("Nine Tailed Fox") is an intensively trained Task Force specializing in the protection and recontainment of SCP items kept at Site-[DATA REDACTED].",
+                'Mobile Task Force E-11 ("Nine Tailed Fox") is an intensively trained Task Force specializing in the protection and recontainment of SCP items kept at Site-[DATA REDACTED].',
                 "Their tasks include handling containment breaches by re-containing all active, hostile SCP instances, rescuing surviving Foundation personnel and terminating any rogue Class-D personnel.",
             ],
         ),

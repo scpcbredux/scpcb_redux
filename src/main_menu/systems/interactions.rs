@@ -24,7 +24,7 @@ pub fn interact_with_quit_button(
     if let Ok(interaction) = button_query.get_single() {
         match *interaction {
             Interaction::Pressed => {
-                app_exit_event_writer.send(AppExit);
+                app_exit_event_writer.send(AppExit::Success);
             }
             Interaction::Hovered => {}
             Interaction::None => {}

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-#[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
+#[derive(PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum PlayerAction {
     MouseMotion,
     MoveUp,
@@ -14,6 +14,15 @@ pub enum PlayerAction {
     Crouch,
     Save,
     Console,
+}
+
+impl Actionlike for PlayerAction {
+    fn input_control_kind(&self) -> InputControlKind {
+        match self {
+            Self::MouseMotion => InputControlKind::DualAxis,
+            _ => InputControlKind::Button,
+        }
+    }
 }
 
 // TODO: Remove this

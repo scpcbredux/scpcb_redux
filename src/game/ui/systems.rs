@@ -195,7 +195,6 @@ pub fn update_blink_bar(
                 Visibility::Inherited
             };
         }
-        // info!("Blink Meter Value: {:#?}", value);
     }
 }
 
@@ -204,7 +203,7 @@ pub fn update_sprint_bar(
     mut q_progress: Query<(&mut Visibility, &SprintMeter), Without<PlayerStamina>>,
 ) {
     if let Ok(stamina) = query.get_single() {
-        let value = (stamina.amount / 10.0 * PROGRESS_BAR_WIDTH).ceil();
+        let value = (stamina.amount / 100_0.0 * PROGRESS_BAR_WIDTH).ceil();
         for (mut visibility, meter) in &mut q_progress {
             *visibility = if meter.0 > value as usize {
                 Visibility::Hidden
@@ -212,6 +211,5 @@ pub fn update_sprint_bar(
                 Visibility::Inherited
             };
         }
-        // info!("Sprint Meter Value: {:#?}", value);
     }
 }

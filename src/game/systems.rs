@@ -1,11 +1,13 @@
 use super::{components::*, player::*, scps::prelude::*, SimulationState};
+use avian3d::prelude::*;
 use bevy::{
-    core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
+    asset::LoadState,
+    core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping, Skybox},
     prelude::*,
+    render::render_resource::{TextureViewDescriptor, TextureViewDimension},
     window::CursorGrabMode,
 };
 use bevy_rmesh::rmesh::ROOM_SCALE;
-use bevy_xpbd_3d::prelude::*;
 
 pub fn pause_simulation(mut simulation_state_next_state: ResMut<NextState<SimulationState>>) {
     simulation_state_next_state.set(SimulationState::Paused);
@@ -46,7 +48,6 @@ pub fn toggle_simulation(
 
 pub fn spawn_map(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut windows: Query<&mut Window>,
@@ -54,50 +55,6 @@ pub fn spawn_map(
     let mut window = windows.single_mut();
     window.cursor.visible = true;
     window.cursor.grab_mode = CursorGrabMode::None;
-
-    const COUNT: usize = 6;
-    let position_range = -2.0..2.0;
-    let radius_range = 0.0..0.4;
-    let pos_len = position_range.end - position_range.start;
-    let radius_len = radius_range.end - radius_range.start;
-    let mesh = meshes.add(Sphere::new(1.0).mesh().uv(120, 64));
-
-    for i in 0..COUNT {
-        let percent = i as f32 / COUNT as f32;
-        let radius = radius_range.start + percent * radius_len;
-
-        // sphere light
-        commands
-            .spawn((
-                PbrBundle {
-                    mesh: mesh.clone(),
-                    material: materials.add(StandardMaterial {
-                        base_color: Color::rgb(0.5, 0.5, 1.0),
-                        emissive: Color::rgb(0.2, 0.2, 1.0),
-                        unlit: true,
-                        ..default()
-                    }),
-                    transform: Transform::from_xyz(
-                        position_range.start + percent * pos_len,
-                        0.3,
-                        0.0,
-                    )
-                    .with_scale(Vec3::splat(radius)),
-                    ..default()
-                },
-                BloomSettings::NATURAL,
-            ))
-            .with_children(|children| {
-                children.spawn(PointLightBundle {
-                    point_light: PointLight {
-                        radius,
-                        color: Color::rgb(0.2, 0.2, 1.0),
-                        ..default()
-                    },
-                    ..default()
-                });
-            });
-    }
 
     // SCP-106
     commands
@@ -157,24 +114,26 @@ pub fn spawn_map(
     // Player
     commands.spawn((
         Name::new("MainPlayer"),
-        Collider::capsule(0.5, 0.3),
+        Collider::capsule(0.3, 0.3),
         Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
         Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
         RigidBody::Dynamic,
         LockedAxes::ROTATION_LOCKED,
         GravityScale(1.0),
-        Position::from_xyz(1.8, 1.1, 1.5),
+        Position::from_xyz(1.8, 2.0, 1.5),
         TransformBundle::default(),
-        PlayerBundle::default(),
-        PlayerFootsteps::new(&asset_server),
+        PlayerBundle::new(&asset_server),
         Map,
+        AudioBundle::default(),
     ));
+
+    let skybox_handle = asset_server.load("map/sky_cubemap.png");
 
     // Player Camera
     commands.spawn((
         Camera3dBundle {
             camera: Camera {
-                hdr: true,
+                //hdr: true,
                 ..default()
             },
             tonemapping: Tonemapping::TonyMcMapface,
@@ -185,6 +144,10 @@ pub fn spawn_map(
                 ..Default::default()
             }),
             ..Default::default()
+        },
+        Skybox {
+            image: skybox_handle.clone(),
+            brightness: 1000.0,
         },
         BloomSettings::NATURAL,
         PlayerCamera::default(),
@@ -198,14 +161,40 @@ pub fn spawn_map(
             ..default()
         },
         Name::new("StartRoom"),
-        AsyncSceneCollider::new(Some(ComputedCollider::TriMesh)),
+        ColliderConstructorHierarchy::new(Some(ColliderConstructor::TrimeshFromMesh)),
         RigidBody::Static,
         Map,
     ));
+
+    commands.insert_resource(Cubemap {
+        is_loaded: false,
+        image_handle: skybox_handle,
+    });
 }
 
 pub fn despawn_map(mut commands: Commands, query: Query<Entity, With<Map>>) {
     for map in &query {
         commands.entity(map).despawn_recursive();
+    }
+}
+
+pub fn load_cubemap(
+    asset_server: Res<AssetServer>,
+    mut images: ResMut<Assets<Image>>,
+    mut cubemap: ResMut<Cubemap>,
+) {
+    if !cubemap.is_loaded && asset_server.load_state(&cubemap.image_handle) == LoadState::Loaded {
+        let image = images.get_mut(&cubemap.image_handle).unwrap();
+        // NOTE: PNGs do not have any metadata that could indicate they contain a cubemap texture,
+        // so they appear as one texture. The following code reconfigures the texture as necessary.
+        if image.texture_descriptor.array_layer_count() == 1 {
+            image.reinterpret_stacked_2d_as_array(image.height() / image.width());
+            image.texture_view_descriptor = Some(TextureViewDescriptor {
+                dimension: Some(TextureViewDimension::Cube),
+                ..default()
+            });
+        }
+
+        cubemap.is_loaded = true;
     }
 }

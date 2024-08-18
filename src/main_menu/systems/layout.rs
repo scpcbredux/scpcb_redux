@@ -12,7 +12,7 @@ pub fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         AudioBundle {
-            source: asset_server.load("sounds/music/menu.wav"),
+            source: asset_server.load("audio/music/menu.wav"),
             settings: PlaybackSettings::LOOP,
         },
         MainMenuMusic,

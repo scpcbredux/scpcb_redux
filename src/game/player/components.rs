@@ -50,24 +50,30 @@ impl Default for PlayerBlinkTimer {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct PlayerStamina {
     pub amount: f32,
-    pub effect: f32,
-    pub effect_timer: Timer,
+    pub max_amount: f32,
+    pub breath_sounds: Vec<Handle<AudioSource>>,
 }
 
-impl Default for PlayerStamina {
-    fn default() -> Self {
+impl PlayerStamina {
+    pub fn new(asset_server: &Res<AssetServer>) -> Self {
         Self {
             amount: 100.0,
-            effect: Default::default(),
-            effect_timer: Default::default(),
+            max_amount: 100.0,
+            breath_sounds: vec![
+                asset_server.load("audio/sfx/player/breath/breath01.wav"),
+                asset_server.load("audio/sfx/player/breath/breath02.wav"),
+                asset_server.load("audio/sfx/player/breath/breath03.wav"),
+                asset_server.load("audio/sfx/player/breath/breath04.wav"),
+                asset_server.load("audio/sfx/player/breath/breath05.wav"),
+            ],
         }
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct PlayerFootsteps {
     pub walk_footsteps: Vec<Handle<AudioSource>>,
     pub run_footsteps: Vec<Handle<AudioSource>>,
@@ -78,24 +84,24 @@ impl PlayerFootsteps {
     pub fn new(asset_server: &Res<AssetServer>) -> Self {
         Self {
             walk_footsteps: vec![
-                asset_server.load("sounds/sfx/footsteps/step01.wav"),
-                asset_server.load("sounds/sfx/footsteps/step02.wav"),
-                asset_server.load("sounds/sfx/footsteps/step03.wav"),
-                asset_server.load("sounds/sfx/footsteps/step04.wav"),
-                asset_server.load("sounds/sfx/footsteps/step05.wav"),
-                asset_server.load("sounds/sfx/footsteps/step06.wav"),
-                asset_server.load("sounds/sfx/footsteps/step07.wav"),
-                asset_server.load("sounds/sfx/footsteps/step08.wav"),
+                asset_server.load("audio/sfx/player/footsteps/step01.wav"),
+                asset_server.load("audio/sfx/player/footsteps/step02.wav"),
+                asset_server.load("audio/sfx/player/footsteps/step03.wav"),
+                asset_server.load("audio/sfx/player/footsteps/step04.wav"),
+                asset_server.load("audio/sfx/player/footsteps/step05.wav"),
+                asset_server.load("audio/sfx/player/footsteps/step06.wav"),
+                asset_server.load("audio/sfx/player/footsteps/step07.wav"),
+                asset_server.load("audio/sfx/player/footsteps/step08.wav"),
             ],
             run_footsteps: vec![
-                asset_server.load("sounds/sfx/footsteps/run01.wav"),
-                asset_server.load("sounds/sfx/footsteps/run02.wav"),
-                asset_server.load("sounds/sfx/footsteps/run03.wav"),
-                asset_server.load("sounds/sfx/footsteps/run04.wav"),
-                asset_server.load("sounds/sfx/footsteps/run05.wav"),
-                asset_server.load("sounds/sfx/footsteps/run06.wav"),
-                asset_server.load("sounds/sfx/footsteps/run07.wav"),
-                asset_server.load("sounds/sfx/footsteps/run08.wav"),
+                asset_server.load("audio/sfx/player/footsteps/run01.wav"),
+                asset_server.load("audio/sfx/player/footsteps/run02.wav"),
+                asset_server.load("audio/sfx/player/footsteps/run03.wav"),
+                asset_server.load("audio/sfx/player/footsteps/run04.wav"),
+                asset_server.load("audio/sfx/player/footsteps/run05.wav"),
+                asset_server.load("audio/sfx/player/footsteps/run06.wav"),
+                asset_server.load("audio/sfx/player/footsteps/run07.wav"),
+                asset_server.load("audio/sfx/player/footsteps/run08.wav"),
             ],
             timer: Timer::new(Duration::from_secs_f32(0.3), TimerMode::Repeating),
         }

@@ -8,7 +8,7 @@ pub struct PlayerBundle {
     pub player: Player,
     pub blink_timer: PlayerBlinkTimer,
     pub stamina: PlayerStamina,
-    // pub footsteps: PlayerFootsteps,
+    pub footsteps: PlayerFootsteps,
     pub input_bundle: InputManagerBundle<PlayerAction>,
 }
 
@@ -18,7 +18,7 @@ impl Default for PlayerBundle {
             player: Default::default(),
             blink_timer: Default::default(),
             stamina: Default::default(),
-            // footsteps: Default::default(),
+            footsteps: Default::default(),
             input_bundle: InputManagerBundle::<PlayerAction> {
                 action_state: ActionState::default(),
                 input_map: InputMap::new([
@@ -32,9 +32,18 @@ impl Default for PlayerBundle {
                     (PlayerAction::Crouch, KeyCode::ControlLeft),
                     (PlayerAction::Console, KeyCode::F3),
                 ])
-                .insert(PlayerAction::MouseMotion, DualAxis::mouse_motion())
-                .build(),
+                .with_dual_axis(PlayerAction::MouseMotion, MouseMove::default()),
             },
+        }
+    }
+}
+
+impl PlayerBundle {
+    pub fn new(asset_server: &Res<AssetServer>) -> Self {
+        Self {
+            stamina: PlayerStamina::new(asset_server),
+            footsteps: PlayerFootsteps::new(asset_server),
+            ..Default::default()
         }
     }
 }

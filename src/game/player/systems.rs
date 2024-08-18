@@ -1,6 +1,6 @@
 use crate::game::player::{components::*, resources::*, ANGLE_EPSILON};
+use avian3d::prelude::*;
 use bevy::prelude::*;
-use bevy_xpbd_3d::prelude::*;
 use leafwing_input_manager::prelude::*;
 use rand::seq::SliceRandom;
 use std::{f32::consts::*, time::Duration};
@@ -11,12 +11,12 @@ pub fn player_input(
     mut input: ResMut<PlayerInput>,
 ) {
     for (action_state, player, player_stamina) in &query {
-        let window = windows.single();
-        if window.focused {
-            if let Some(vector) = action_state.axis_pair(&PlayerAction::MouseMotion) {
+        if let Ok(window) = windows.get_single() {
+            if window.focused {
+                let vector = action_state.axis_pair(&PlayerAction::MouseMotion);
                 let mut delta = Vec2::ZERO;
-                delta.x += vector.x();
-                delta.y += vector.y();
+                delta.x += vector.x;
+                delta.y += vector.y;
                 delta *= player.mouse_sensitivity;
 
                 input.pitch = (input.pitch - delta.y)
@@ -47,14 +47,17 @@ pub fn player_input(
     }
 }
 
-pub fn player_move(mut query: Query<(&mut Player, &mut LinearVelocity)>, input: Res<PlayerInput>) {
-    for (mut player, mut linear_velocity) in &mut query {
+pub fn player_move(
+    mut query: Query<(&mut Player, &PlayerStamina, &mut LinearVelocity)>,
+    input: Res<PlayerInput>,
+) {
+    for (mut player, player_stamina, mut linear_velocity) in &mut query {
         let mut move_to_world = Mat3::from_axis_angle(Vec3::Y, input.yaw);
         move_to_world.z_axis *= -1.0;
 
         player.speed = if input.crouched {
             player.crouch_speed
-        } else if input.sprinting {
+        } else if input.sprinting && player_stamina.amount > 0.0 {
             player.run_speed
         } else {
             player.walk_speed
@@ -102,15 +105,12 @@ pub fn player_look(
 pub fn player_footsteps(
     time: Res<Time>,
     mut commands: Commands,
-    mut player_q: Query<(Entity, &LinearVelocity, &mut PlayerFootsteps, &Transform), With<Player>>,
+    mut query: Query<(Entity, &LinearVelocity, &mut PlayerFootsteps, &Transform), With<Player>>,
     input: Res<PlayerInput>,
 ) {
     let dt = time.delta_seconds();
 
-    // Space between the two ears
-    // let gap = 4.0;
-
-    for (entity, linear_velocity, mut footsteps, _transform) in &mut player_q {
+    for (entity, linear_velocity, mut footsteps, _transform) in &mut query {
         let mut rng = rand::thread_rng();
 
         footsteps
@@ -127,8 +127,7 @@ pub fn player_footsteps(
             if let Some(source) = rand_step {
                 commands.entity(entity).insert(AudioBundle {
                     source: source.clone(),
-                    settings: PlaybackSettings::REMOVE.with_spatial(/*true*/ false),
-                    // spatial: SpatialSettings::new(*transform, gap, transform.translation),
+                    settings: PlaybackSettings::REMOVE,
                 });
             }
         }
@@ -150,29 +149,37 @@ pub fn player_blink(
 }
 
 pub fn player_stamina(
-    time: Res<Time>,
-    mut query: Query<&mut PlayerStamina>,
+    mut commands: Commands,
+    mut query: Query<(&mut PlayerStamina, Entity)>,
     input: Res<PlayerInput>,
 ) {
-    let dt = time.delta_seconds();
+    for (mut stamina, entity) in &mut query {
+        let mut rng = rand::thread_rng();
 
-    if let Ok(mut stamina) = query.get_single_mut() {
         if input.sprinting {
-            stamina.amount -= dt * 0.5 * (1.0 / stamina.effect);
-            if stamina.amount <= 0.0 {
-                stamina.amount = -20.0;
+            stamina.amount -= 0.2;
+            /*if stamina.amount < 0.0 {
+                stamina.amount = -10.0;
+            }*/
+
+            if stamina.amount < 5.0 {
+                commands.entity(entity).insert(AudioBundle {
+                    source: stamina.breath_sounds[0].clone(),
+                    settings: PlaybackSettings::REMOVE,
+                });
+            } else if stamina.amount < 50.0 {
+                let rand_sound = stamina.breath_sounds.choose(&mut rng);
+
+                if let Some(source) = rand_sound {
+                    commands.entity(entity).insert(AudioBundle {
+                        source: source.clone(),
+                        settings: PlaybackSettings::REMOVE,
+                    });
+                }
             }
         } else {
-            stamina.amount = (stamina.amount + 0.15 * dt).min(100.0);
+            stamina.amount = (stamina.amount + 0.15).min(stamina.max_amount);
         }
-
-        if stamina.effect_timer.finished() {
-            stamina.effect -= dt / 70.0;
-        } else {
-            stamina.effect = 1.0;
-        }
-
-        // info!("Stamina: {:#?}", stamina.amount);
     }
 }
 
